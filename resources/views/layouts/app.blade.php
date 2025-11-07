@@ -5,7 +5,9 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+        <title>Reservas - Venta de Hielo</title>
+
+        <link rel="icon" type="image/png" href="{{ asset('copo-de-nieve.png') }}">
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -47,7 +49,7 @@
                                 <svg class="mr-3 h-5 w-5 {{ request()->routeIs('dashboard') ? 'text-white' : 'text-gray-400 group-hover:text-gray-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                                 </svg>
-                                Dashboard
+                                Tablero
                             </a>
 
                             <a href="{{ route('clientes.index') }}" class="{{ request()->routeIs('clientes.*') ? 'bg-gradient-to-r from-blue-500 to-cyan-600 text-white' : 'text-gray-700 hover:bg-gray-100' }} group flex items-center px-3 py-3 text-sm font-semibold rounded-xl transition-all duration-200">
@@ -111,13 +113,13 @@
                                              style="display: none;">
                                             <div class="py-1">
                                                 <a href="{{ route('profile.show') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                                    {{ __('Profile') }}
+                                                    {{ __('Perfil') }}
                                                 </a>
                                                 <div class="border-t border-gray-200"></div>
                                                 <form method="POST" action="{{ route('logout') }}">
                                                     @csrf
                                                     <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                                        {{ __('Log Out') }}
+                                                        {{ __('Cerrar sesión') }}
                                                     </button>
                                                 </form>
                                             </div>

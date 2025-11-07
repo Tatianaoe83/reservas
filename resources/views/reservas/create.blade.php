@@ -15,6 +15,54 @@
         </div>
     </x-slot>
 
+    @once
+        @push('styles')
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css">
+            <style>
+                .select2-container--default .select2-selection--single {
+                    display: flex;
+                    align-items: center;
+                    height: 2.75rem;
+                    border: 1px solid #d1d5db;
+                    border-radius: 0.375rem;
+                    padding: 0 0.75rem;
+                    transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+                }
+
+                .select2-container--default.select2-container--focus .select2-selection--single {
+                    border-color: #6366f1;
+                    box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.2);
+                }
+
+                .select2-container--default .select2-selection--single .select2-selection__rendered {
+                    line-height: 1.75rem;
+                    padding-left: 0;
+                    color: #111827;
+                }
+
+                .select2-container--default .select2-selection--single .select2-selection__arrow {
+                    height: 2.75rem;
+                    right: 0.75rem;
+                }
+
+                .select2-dropdown {
+                    border-color: #d1d5db;
+                }
+
+                .select2-results__option--highlighted.select2-results__option--selectable {
+                    background-color: #4f46e5;
+                }
+            </style>
+        @endpush
+    @endonce
+
+    @once
+        @push('scripts')
+            <script src="https://code.jquery.com/jquery-3.7.1.min.js" crossorigin="anonymous"></script>
+            <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+        @endpush
+    @endonce
+
     <div class="py-6 sm:py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-xl rounded-xl sm:rounded-lg p-4 sm:p-6">
@@ -55,7 +103,7 @@
 
                         <div>
                             <label for="fecha" class="block text-sm font-medium text-gray-700">Fecha *</label>
-                            <input type="date" name="fecha" id="fecha" value="{{ old('fecha', date('Y-m-d')) }}" required min="{{ date('Y-m-d') }}"
+                            <input type="date" name="fecha" id="fecha" required min="{{ date('Y-m-d') }}"
                                 class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                             @error('fecha')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -121,40 +169,80 @@
 
     @push('scripts')
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const vehiculoSelect = document.getElementById('vehiculo_id');
-            const fechaInput = document.getElementById('fecha');
-            const horaSelect = document.getElementById('hora');
-            const horarioInfo = document.getElementById('horario-info');
-            
-            // Guardar todos los horarios iniciales
-            const todosHorarios = Array.from(horaSelect.options).map(option => ({
-                value: option.value,
-                text: option.textContent
-            })).filter(opt => opt.value !== '');
+        (function() {
+            const initSelects = () => {
+                if (!window.jQuery || !$.fn.select2) {
+                    return;
+                }
 
-            function actualizarHorariosDisponibles() {
+                const vehiculoSelect = document.getElementById('vehiculo_id');
+                const fechaInput = document.getElementById('fecha');
+                const horaSelect = document.getElementById('hora');
+                const horarioInfo = document.getElementById('horario-info');
+                const $clienteSelect = $('#cliente_id');
+                const $vehiculoSelect = $('#vehiculo_id');
+                const $horaSelect = $('#hora');
+
+                if ($clienteSelect.hasClass('select2-hidden-accessible')) {
+                    return;
+                }
+
+                const commonSelect2Config = {
+                    width: '100%',
+                    allowClear: true,
+                    language: {
+                        noResults: () => 'Sin resultados',
+                        searching: () => 'Buscando…'
+                    }
+                };
+
+                $clienteSelect.select2({
+                    ...commonSelect2Config,
+                    placeholder: 'Seleccione un cliente'
+                });
+
+                $vehiculoSelect.select2({
+                    ...commonSelect2Config,
+                    placeholder: 'Seleccione un vehículo'
+                });
+
+                $horaSelect.select2({
+                    ...commonSelect2Config,
+                    placeholder: 'Seleccione una hora',
+                    dropdownParent: $horaSelect.parent()
+                });
+                
+                // Guardar todos los horarios iniciales
+                const todosHorarios = Array.from(horaSelect.options).map(option => ({
+                    value: option.value,
+                    text: option.textContent
+                })).filter(opt => opt.value !== '');
+
+            const actualizarHorariosDisponibles = () => {
                 const vehiculoId = vehiculoSelect.value;
                 const fecha = fechaInput.value;
 
                 // Si no hay vehículo o fecha seleccionada, limpiar horarios
-                if (!vehiculoId || !fecha) {
-                    if (!vehiculoId && !fecha) {
-                        horaSelect.innerHTML = '<option value="">Seleccione vehículo y fecha primero</option>';
-                    } else if (!vehiculoId) {
-                        horaSelect.innerHTML = '<option value="">Seleccione un vehículo primero</option>';
-                    } else {
-                        horaSelect.innerHTML = '<option value="">Seleccione una fecha primero</option>';
-                    }
+                    if (!vehiculoId || !fecha) {
+                        if (!vehiculoId && !fecha) {
+                            $horaSelect.html('<option value="">Seleccione vehículo y fecha primero</option>');
+                        } else if (!vehiculoId) {
+                            $horaSelect.html('<option value="">Seleccione un vehículo primero</option>');
+                        } else {
+                            $horaSelect.html('<option value="">Seleccione una fecha primero</option>');
+                        }
+                        $horaSelect.trigger('change.select2');
                     horarioInfo.classList.add('hidden');
                     return;
                 }
 
                 // Mostrar carga
-                horaSelect.disabled = true;
-                horaSelect.innerHTML = '<option value="">Cargando horarios...</option>';
+                $horaSelect.prop('disabled', true);
+                    $horaSelect.html('<option value="">Cargando horarios...</option>').trigger('change.select2');
                 horarioInfo.textContent = 'Cargando disponibilidad...';
                 horarioInfo.classList.remove('hidden');
+
+                console.log('Solicitando horarios disponibles', { vehiculoId, fecha });
 
                 // Hacer petición AJAX
                 fetch(`{{ route('reservas.horarios-disponibles') }}?vehiculo_id=${vehiculoId}&fecha=${fecha}`, {
@@ -174,20 +262,28 @@
                     if (!data || typeof data.horarios === 'undefined') {
                         throw new Error('Formato de respuesta inválido');
                     }
-                    
-                    // Debug: verificar datos recibidos
-                    console.log('Horarios recibidos:', data.horarios);
-                    console.log('Horarios ocupados:', data.horarios_ocupados);
+                    console.log('Respuesta horarios', data);
                     
                     // Limpiar el select
-                    horaSelect.innerHTML = '<option value="">Seleccione una hora</option>';
+                    $horaSelect.html('<option value="">Seleccione una hora</option>');
 
                     if (data.horarios.length === 0) {
-                        horaSelect.innerHTML = '<option value="">No hay horarios disponibles</option>';
-                        horarioInfo.textContent = '⚠️ No hay horarios disponibles para este vehículo en la fecha seleccionada.';
-                        horarioInfo.classList.remove('hidden');
-                        horarioInfo.classList.add('text-red-600');
-                        horarioInfo.classList.remove('text-gray-500');
+                        if (!data.horarios_ocupados || data.horarios_ocupados.length === 0) {
+                            todosHorarios.forEach(horario => {
+                                const option = new Option(horario.text, horario.value, false, horario.value === '{{ old("hora") }}');
+                                $horaSelect.append(option);
+                            });
+                            horarioInfo.textContent = '⚠️ No se recibieron horarios disponibles desde el servidor. Se muestran todos los horarios estándar.';
+                            horarioInfo.classList.remove('hidden');
+                            horarioInfo.classList.add('text-orange-600');
+                            horarioInfo.classList.remove('text-gray-500', 'text-red-600', 'text-blue-600', 'text-green-600');
+                        } else {
+                            $horaSelect.html('<option value="">No hay horarios disponibles</option>').trigger('change.select2');
+                            horarioInfo.textContent = '⚠️ No hay horarios disponibles para este vehículo en la fecha seleccionada.';
+                            horarioInfo.classList.remove('hidden');
+                            horarioInfo.classList.add('text-red-600');
+                            horarioInfo.classList.remove('text-gray-500');
+                        }
                     } else {
                         // Agregar SOLO horarios disponibles (los ocupados ya vienen filtrados del servidor)
                         data.horarios.forEach(horario => {
@@ -199,31 +295,21 @@
                                 console.warn('Horario ocupado detectado pero enviado como disponible:', horarioFormato);
                                 return; // Saltar este horario
                             }
-                            
-                            const option = document.createElement('option');
-                            option.value = horarioFormato;
-                            
-                            // Formatear la hora para mostrar
+
+                            let etiquetaHorario = horarioFormato;
                             const [h, m] = horarioFormato.split(':');
                             if (h && m) {
                                 const horaFormato = new Date(2000, 0, 1, parseInt(h), parseInt(m));
-                                const horaFormateada = horaFormato.toLocaleTimeString('es-ES', { 
-                                    hour: '2-digit', 
+                                etiquetaHorario = horaFormato.toLocaleTimeString('es-ES', {
+                                    hour: '2-digit',
                                     minute: '2-digit',
-                                    hour12: true 
+                                    hour12: true
                                 });
-                                
-                                option.textContent = horaFormateada;
-                            } else {
-                                option.textContent = horarioFormato;
                             }
-                            
-                            // Mantener selección anterior si existe
-                            if (option.value === '{{ old("hora") }}' || option.value === '{{ old("hora") }}'.substring(0, 5)) {
-                                option.selected = true;
-                            }
-                            
-                            horaSelect.appendChild(option);
+
+                            const isSelected = horarioFormato === '{{ old("hora") }}' || horarioFormato === '{{ old("hora") }}'.substring(0, 5);
+                            const option = new Option(etiquetaHorario, horarioFormato, false, isSelected);
+                            $horaSelect.append(option);
                         });
 
                         // Mostrar información de horarios ocupados
@@ -241,52 +327,46 @@
                         }
                     }
 
-                    horaSelect.disabled = false;
+                        $horaSelect.prop('disabled', false).trigger('change.select2');
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    horaSelect.innerHTML = '<option value="">Error al cargar horarios</option>';
+                    $horaSelect.html('<option value="">Error al cargar horarios</option>');
                     
                     // Mostrar todos los horarios como fallback
                     todosHorarios.forEach(horario => {
-                        const option = document.createElement('option');
-                        option.value = horario.value;
-                        option.textContent = horario.text;
-                        if (option.value === '{{ old("hora") }}') {
-                            option.selected = true;
-                        }
-                        horaSelect.appendChild(option);
+                        const option = new Option(horario.text, horario.value, false, horario.value === '{{ old("hora") }}');
+                        $horaSelect.append(option);
                     });
+                    $horaSelect.trigger('change');
                     
                     horarioInfo.textContent = '⚠️ No se pudieron cargar los horarios disponibles. Por favor, verifique su conexión o recargue la página.';
                     horarioInfo.classList.remove('hidden');
                     horarioInfo.classList.add('text-orange-600');
                     horarioInfo.classList.remove('text-gray-500', 'text-red-600', 'text-green-600', 'text-blue-600');
-                    horaSelect.disabled = false;
+                    $horaSelect.prop('disabled', false);
                 });
-            }
+            };
 
             // Event listeners
-            vehiculoSelect.addEventListener('change', function() {
-                // Si cambia el vehículo y hay fecha, actualizar horarios
-                if (fechaInput.value) {
-                    actualizarHorariosDisponibles();
-                } else {
-                    // Si no hay fecha, limpiar horarios
-                    horaSelect.innerHTML = '<option value="">Primero seleccione una fecha</option>';
+            vehiculoSelect.addEventListener('change', () => {
+                if (!fechaInput.value) {
+                    $horaSelect.html('<option value="">Primero seleccione una fecha</option>').trigger('change.select2');
                     horarioInfo.classList.add('hidden');
+                    return;
                 }
+
+                actualizarHorariosDisponibles();
             });
-            
-            fechaInput.addEventListener('change', function() {
-                // Si cambia la fecha y hay vehículo, actualizar horarios
-                if (vehiculoSelect.value) {
-                    actualizarHorariosDisponibles();
-                } else {
-                    // Si no hay vehículo, limpiar horarios
-                    horaSelect.innerHTML = '<option value="">Primero seleccione un vehículo</option>';
+
+            fechaInput.addEventListener('change', () => {
+                if (!vehiculoSelect.value) {
+                    $horaSelect.html('<option value="">Primero seleccione un vehículo</option>').trigger('change.select2');
                     horarioInfo.classList.add('hidden');
+                    return;
                 }
+
+                actualizarHorariosDisponibles();
             });
 
             // Inicializar: si ya hay valores seleccionados (después de un error de validación), actualizar horarios
@@ -294,9 +374,19 @@
                 actualizarHorariosDisponibles();
             } else {
                 // Si no hay ambos valores, limpiar el select de horarios inicialmente
-                horaSelect.innerHTML = '<option value="">Seleccione vehículo y fecha primero</option>';
+                $horaSelect.html('<option value="">Seleccione vehículo y fecha primero</option>').trigger('change.select2');
             }
-        });
+            };
+
+            const state = document.readyState;
+            if (state === 'complete' || state === 'interactive') {
+                initSelects();
+            } else {
+                document.addEventListener('DOMContentLoaded', initSelects, { once: true });
+            }
+
+            window.addEventListener('load', initSelects, { once: true });
+        })();
     </script>
     @endpush
 </x-app-layout>

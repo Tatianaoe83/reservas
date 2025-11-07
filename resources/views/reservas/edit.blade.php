@@ -5,6 +5,54 @@
         </h2>
     </x-slot>
 
+    @once
+        @push('styles')
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css">
+            <style>
+                .select2-container--default .select2-selection--single {
+                    display: flex;
+                    align-items: center;
+                    height: 2.75rem;
+                    border: 1px solid #d1d5db;
+                    border-radius: 0.375rem;
+                    padding: 0 0.75rem;
+                    transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+                }
+
+                .select2-container--default.select2-container--focus .select2-selection--single {
+                    border-color: #6366f1;
+                    box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.2);
+                }
+
+                .select2-container--default .select2-selection--single .select2-selection__rendered {
+                    line-height: 1.75rem;
+                    padding-left: 0;
+                    color: #111827;
+                }
+
+                .select2-container--default .select2-selection--single .select2-selection__arrow {
+                    height: 2.75rem;
+                    right: 0.75rem;
+                }
+
+                .select2-dropdown {
+                    border-color: #d1d5db;
+                }
+
+                .select2-results__option--highlighted.select2-results__option--selectable {
+                    background-color: #4f46e5;
+                }
+            </style>
+        @endpush
+    @endonce
+
+    @once
+        @push('scripts')
+            <script src="https://code.jquery.com/jquery-3.7.1.min.js" crossorigin="anonymous"></script>
+            <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+        @endpush
+    @endonce
+
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">
@@ -109,52 +157,110 @@
 
     @push('scripts')
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        (function() {
+            const initSelects = () => {
+                if (!window.jQuery || !$.fn.select2) {
+                    return;
+                }
+
             const vehiculoSelect = document.getElementById('vehiculo_id');
             const fechaInput = document.getElementById('fecha');
             const horaSelect = document.getElementById('hora');
             const horarioInfo = document.getElementById('horario-info');
             const reservaId = {{ $reserva->id }};
-            const horaActual = '{{ $reserva->hora }}';
-            
-            // Guardar todos los horarios iniciales
+                const horaActual = "{{ $reserva->hora }}";
+                const horaActualNormalizada = horaActual ? horaActual.substring(0, 5) : '';
+                const oldHoraRaw = "{{ old('hora') }}";
+                const oldHoraNormalizada = oldHoraRaw ? oldHoraRaw.substring(0, 5) : '';
+                const $clienteSelect = $('#cliente_id');
+                const $vehiculoSelect = $('#vehiculo_id');
+                const $horaSelect = $('#hora');
+
+                if ($clienteSelect.hasClass('select2-hidden-accessible')) {
+                    return;
+                }
+
+                const commonSelect2Config = {
+                    width: '100%',
+                    allowClear: true,
+                    language: {
+                        noResults: () => 'Sin resultados',
+                        searching: () => 'Buscando…'
+                    }
+                };
+
+                $clienteSelect.select2({
+                    ...commonSelect2Config,
+                    placeholder: 'Seleccione un cliente'
+                });
+
+                $vehiculoSelect.select2({
+                    ...commonSelect2Config,
+                    placeholder: 'Seleccione un vehículo'
+                });
+
+                $horaSelect.select2({
+                    ...commonSelect2Config,
+                    placeholder: 'Seleccione una hora',
+                    dropdownParent: $horaSelect.parent()
+                });
+
             const todosHorarios = Array.from(horaSelect.options).map(option => ({
                 value: option.value,
                 text: option.textContent
             })).filter(opt => opt.value !== '');
 
-            function actualizarHorariosDisponibles() {
+                const normalizarHora = valor => (valor ? valor.substring(0, 5) : '');
+                const formatearEtiqueta = valor => {
+                    const normalizado = normalizarHora(valor);
+                    const [h, m] = normalizado.split(':');
+                    if (h && m) {
+                        const fechaReferencia = new Date(2000, 0, 1, parseInt(h, 10), parseInt(m, 10));
+                        return fechaReferencia.toLocaleTimeString('es-ES', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: true
+                        });
+                    }
+                    return normalizado;
+                };
+
+                const agregarOpcionHora = (valor, seleccionado = false) => {
+                    const normalizado = normalizarHora(valor);
+                    if (!normalizado) {
+                        return;
+                    }
+                    const option = new Option(formatearEtiqueta(normalizado), normalizado, false, seleccionado);
+                    $horaSelect.append(option);
+                };
+
+                const actualizarHorariosDisponibles = () => {
                 const vehiculoId = vehiculoSelect.value;
                 const fecha = fechaInput.value;
 
-                // Si no hay vehículo o fecha seleccionada, limpiar horarios pero mantener la hora actual
                 if (!vehiculoId || !fecha) {
                     if (!vehiculoId && !fecha) {
-                        horaSelect.innerHTML = '<option value="">Seleccione vehículo y fecha primero</option>';
+                            $horaSelect.html('<option value="">Seleccione vehículo y fecha primero</option>');
                     } else if (!vehiculoId) {
-                        horaSelect.innerHTML = '<option value="">Seleccione un vehículo primero</option>';
+                            $horaSelect.html('<option value="">Seleccione un vehículo primero</option>');
                     } else {
-                        horaSelect.innerHTML = '<option value="">Seleccione una fecha primero</option>';
-                    }
-                    // Mantener la hora actual si existe
-                    if (horaActual) {
-                        const option = document.createElement('option');
-                        option.value = horaActual;
-                        option.textContent = horaActual;
-                        option.selected = true;
-                        horaSelect.appendChild(option);
-                    }
+                            $horaSelect.html('<option value="">Seleccione una fecha primero</option>');
+                        }
+                        if (horaActualNormalizada) {
+                            agregarOpcionHora(horaActualNormalizada, true);
+                        }
+                        $horaSelect.trigger('change.select2');
                     horarioInfo.classList.add('hidden');
                     return;
                 }
 
-                // Mostrar carga
-                horaSelect.disabled = true;
-                horaSelect.innerHTML = '<option value="">Cargando horarios...</option>';
+                    $horaSelect.prop('disabled', true);
+                    $horaSelect.html('<option value="">Cargando horarios...</option>').trigger('change.select2');
                 horarioInfo.textContent = 'Cargando disponibilidad...';
                 horarioInfo.classList.remove('hidden');
 
-                // Hacer petición AJAX (excluyendo la reserva actual)
+                    console.log('Solicitando horarios disponibles (edición)', { vehiculoId, fecha, reservaId });
+
                 fetch(`{{ route('reservas.horarios-disponibles') }}?vehiculo_id=${vehiculoId}&fecha=${fecha}&reserva_id=${reservaId}`, {
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest',
@@ -168,56 +274,53 @@
                     return response.json();
                 })
                 .then(data => {
-                    // Validar que data existe y tiene las propiedades esperadas
                     if (!data || typeof data.horarios === 'undefined') {
                         throw new Error('Formato de respuesta inválido');
                     }
-                    // Limpiar el select
-                    horaSelect.innerHTML = '<option value="">Seleccione una hora</option>';
 
-                    // Agregar la hora actual siempre disponible (aunque esté ocupada, porque es esta reserva)
-                    const horaActualFormateada = horaActual.substring(0, 5); // Formato H:i
-                    if (data.horarios.indexOf(horaActualFormateada) === -1) {
-                        data.horarios.push(horaActualFormateada);
-                        data.horarios.sort();
+                        console.log('Respuesta horarios (edición)', data);
+
+                    const horariosOcupados = Array.isArray(data.horarios_ocupados) ? data.horarios_ocupados : [];
+                    let horariosDisponibles = Array.isArray(data.horarios) ? [...data.horarios] : [];
+
+                    if (horaActualNormalizada && !horariosDisponibles.includes(horaActualNormalizada)) {
+                        horariosDisponibles.push(horaActualNormalizada);
                     }
 
-                    if (data.horarios.length === 0) {
-                        horaSelect.innerHTML = '<option value="">No hay horarios disponibles</option>';
+                    horariosDisponibles = horariosDisponibles
+                        .map(normalizarHora)
+                        .filter(Boolean)
+                        .filter((valor, indice, self) => self.indexOf(valor) === indice)
+                        .sort();
+
+                    $horaSelect.html('<option value="">Seleccione una hora</option>');
+
+                    if (horariosDisponibles.length === 0) {
+                            if (horariosOcupados.length === 0) {
+                                todosHorarios.forEach(horario => {
+                                    agregarOpcionHora(horario.value, horario.value === oldHoraNormalizada || horario.value === horaActualNormalizada);
+                                });
+                                $horaSelect.trigger('change.select2');
+                                horarioInfo.textContent = '⚠️ No se recibieron horarios disponibles desde el servidor. Se muestran todos los horarios estándar.';
+                                horarioInfo.classList.remove('hidden');
+                                horarioInfo.classList.add('text-orange-600');
+                                horarioInfo.classList.remove('text-gray-500', 'text-red-600', 'text-blue-600', 'text-green-600');
+                            } else {
+                                $horaSelect.html('<option value="">No hay horarios disponibles</option>').trigger('change.select2');
                         horarioInfo.textContent = '⚠️ No hay horarios disponibles para este vehículo en la fecha seleccionada.';
                         horarioInfo.classList.remove('hidden');
                         horarioInfo.classList.add('text-red-600');
-                        horarioInfo.classList.remove('text-gray-500');
-                    } else {
-                        // Agregar horarios disponibles
-                        data.horarios.forEach(horario => {
-                            const option = document.createElement('option');
-                            option.value = horario;
-                            
-                            // Formatear la hora
-                            const [h, m] = horario.split(':');
-                            const horaFormato = new Date(2000, 0, 1, parseInt(h), parseInt(m));
-                            const horaFormateada = horaFormato.toLocaleTimeString('es-ES', { 
-                                hour: '2-digit', 
-                                minute: '2-digit',
-                                hour12: true 
-                            });
-                            
-                            option.textContent = horaFormateada;
-                            
-                            // Mantener selección actual o anterior
-                            const horaComparar = horario.substring(0, 5);
-                            if (horaComparar === horaActualFormateada || option.value === '{{ old("hora") }}') {
-                                option.selected = true;
+                                horarioInfo.classList.remove('text-gray-500', 'text-green-600', 'text-blue-600');
                             }
-                            
-                            horaSelect.appendChild(option);
+                    } else {
+                        const valorPreferido = oldHoraNormalizada || horaActualNormalizada;
+                        horariosDisponibles.forEach(horario => {
+                            agregarOpcionHora(horario, horario === valorPreferido);
                         });
 
-                        // Mostrar información de horarios ocupados
-                        if (data.horarios_ocupados.length > 0) {
-                            const totalHorarios = data.horarios.length + data.horarios_ocupados.length;
-                            horarioInfo.textContent = `ℹ️ ${data.horarios.length} de ${totalHorarios} horarios disponibles. ${data.horarios_ocupados.length} horario(s) ocupado(s) oculto(s).`;
+                        if (horariosOcupados.length > 0) {
+                            const totalHorarios = horariosDisponibles.length + horariosOcupados.length;
+                            horarioInfo.textContent = `ℹ️ ${horariosDisponibles.length} de ${totalHorarios} horarios disponibles. ${horariosOcupados.length} horario(s) ocupado(s) oculto(s).`;
                             horarioInfo.classList.remove('hidden');
                             horarioInfo.classList.add('text-blue-600');
                             horarioInfo.classList.remove('text-red-600', 'text-gray-500', 'text-green-600');
@@ -229,73 +332,74 @@
                         }
                     }
 
-                    horaSelect.disabled = false;
+                    $horaSelect.prop('disabled', false).trigger('change.select2');
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    horaSelect.innerHTML = '<option value="">Error al cargar horarios</option>';
+                    $horaSelect.html('<option value="">Error al cargar horarios</option>');
                     
-                    // Mostrar todos los horarios como fallback, incluyendo la hora actual
+                    const valorPreferido = oldHoraNormalizada || horaActualNormalizada;
                     todosHorarios.forEach(horario => {
-                        const option = document.createElement('option');
-                        option.value = horario.value;
-                        option.textContent = horario.text;
-                        if (option.value === horaActual || option.value === '{{ old("hora") }}') {
-                            option.selected = true;
-                        }
-                        horaSelect.appendChild(option);
+                        agregarOpcionHora(horario.value, horario.value === valorPreferido);
                     });
+                    $horaSelect.trigger('change.select2');
                     
                     horarioInfo.textContent = '⚠️ No se pudieron cargar los horarios disponibles. Por favor, verifique su conexión o recargue la página.';
                     horarioInfo.classList.remove('hidden');
                     horarioInfo.classList.add('text-orange-600');
                     horarioInfo.classList.remove('text-gray-500', 'text-red-600', 'text-green-600', 'text-blue-600');
-                    horaSelect.disabled = false;
+                    $horaSelect.prop('disabled', false);
                 });
-            }
+                };
 
-            // Event listeners
-            vehiculoSelect.addEventListener('change', function() {
-                // Si cambia el vehículo y hay fecha, actualizar horarios
-                if (fechaInput.value) {
-                    actualizarHorariosDisponibles();
-                } else {
-                    // Si no hay fecha, limpiar horarios pero mantener la hora actual
-                    horaSelect.innerHTML = '<option value="">Primero seleccione una fecha</option>';
-                    if (horaActual) {
-                        const option = document.createElement('option');
-                        option.value = horaActual;
-                        option.textContent = horaActual;
-                        option.selected = true;
-                        horaSelect.appendChild(option);
+                vehiculoSelect.addEventListener('change', () => {
+                    if (!fechaInput.value) {
+                        $horaSelect.html('<option value="">Primero seleccione una fecha</option>');
+                        if (horaActualNormalizada) {
+                            agregarOpcionHora(horaActualNormalizada, true);
+                        }
+                        $horaSelect.trigger('change.select2');
+                        horarioInfo.classList.add('hidden');
+                        return;
                     }
-                    horarioInfo.classList.add('hidden');
-                }
-            });
-            
-            fechaInput.addEventListener('change', function() {
-                // Si cambia la fecha y hay vehículo, actualizar horarios
-                if (vehiculoSelect.value) {
-                    actualizarHorariosDisponibles();
-                } else {
-                    // Si no hay vehículo, limpiar horarios pero mantener la hora actual
-                    horaSelect.innerHTML = '<option value="">Primero seleccione un vehículo</option>';
-                    if (horaActual) {
-                        const option = document.createElement('option');
-                        option.value = horaActual;
-                        option.textContent = horaActual;
-                        option.selected = true;
-                        horaSelect.appendChild(option);
-                    }
-                    horarioInfo.classList.add('hidden');
-                }
-            });
 
-            // Inicializar: si ya hay valores seleccionados, actualizar horarios
+                    actualizarHorariosDisponibles();
+                });
+
+                fechaInput.addEventListener('change', () => {
+                    if (!vehiculoSelect.value) {
+                        $horaSelect.html('<option value="">Primero seleccione un vehículo</option>');
+                        if (horaActualNormalizada) {
+                            agregarOpcionHora(horaActualNormalizada, true);
+                        }
+                        $horaSelect.trigger('change.select2');
+                        horarioInfo.classList.add('hidden');
+                        return;
+                    }
+
+                actualizarHorariosDisponibles();
+                });
+
             if (vehiculoSelect.value && fechaInput.value) {
                 actualizarHorariosDisponibles();
+            } else {
+                $horaSelect.html('<option value="">Seleccione vehículo y fecha primero</option>');
+                if (horaActualNormalizada) {
+                    agregarOpcionHora(horaActualNormalizada, true);
+                }
+                $horaSelect.trigger('change.select2');
             }
-        });
+            };
+
+            const state = document.readyState;
+            if (state === 'complete' || state === 'interactive') {
+                initSelects();
+            } else {
+                document.addEventListener('DOMContentLoaded', initSelects, { once: true });
+            }
+
+            window.addEventListener('load', initSelects, { once: true });
+        })();
     </script>
     @endpush
 </x-app-layout>

@@ -79,10 +79,23 @@
                 </div>
             </div>
 
+            <!-- Info Semanas -->
+            <div class="mb-4">
+                <div class="flex items-start gap-3 bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-900">
+                    <svg class="w-5 h-5 text-blue-500 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <div>
+                        <p class="font-semibold">¿Cómo se calculan las semanas?</p>
+                        <p class="mt-1">Cada reserva se asigna a una de las cinco semanas del mes según el día registrado: Semana 1 (días 1-7), Semana 2 (8-14), Semana 3 (15-21), Semana 4 (22-28) y Semana 5 agrupa los días restantes del mes.</p>
+                    </div>
+                </div>
+            </div>
+
             <!-- Tabla de Ventas Acumuladas -->
             <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
+                    <table class="w-full min-w-[960px] md:min-w-full divide-y divide-gray-200">
                         <thead class="bg-gradient-to-r from-blue-600 to-blue-700">
                             <tr>
                                 <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider border-r border-blue-500">
