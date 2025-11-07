@@ -50,6 +50,8 @@ Route::middleware([
     Route::prefix('reportes')->name('reportes.')->group(function () {
         Route::get('/', [ReporteController::class, 'index'])->name('index');
         Route::get('general', [ReporteController::class, 'general'])->name('general');
+        Route::get('general/export', [ReporteController::class, 'exportGeneral'])->name('general.export');
         Route::get('ventas-acumuladas', [ReporteController::class, 'ventasAcumuladas'])->name('ventas-acumuladas');
+        Route::get('ventas-acumuladas/export', [ReporteController::class, 'exportVentasAcumuladas'])->name('ventas-acumuladas.export');
     });
 });

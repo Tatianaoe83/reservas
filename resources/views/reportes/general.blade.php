@@ -256,7 +256,14 @@
             </div>
 
             <!-- Botón de Imprimir -->
-            <div class="mt-6 flex justify-end">
+            <div class="mt-6 flex flex-col sm:flex-row gap-3 justify-end">
+                <a href="{{ route('reportes.general.export', ['fecha_inicio' => $fechaInicio, 'fecha_fin' => $fechaFin]) }}"
+                   class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition-colors text-center">
+                    <svg class="h-5 w-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 17l4 4m0 0l4-4m-4 4V3" />
+                    </svg>
+                    Exportar a Excel
+                </a>
                 <button onclick="window.print()" 
                         class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition-colors">
                     <svg class="h-5 w-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

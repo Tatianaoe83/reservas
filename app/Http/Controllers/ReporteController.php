@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\ReporteGeneralExport;
+use App\Exports\VentasAcumuladasExport;
 use App\Models\Reserva;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Carbon\Carbon;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ReporteController extends Controller
 {
@@ -16,49 +19,171 @@ class ReporteController extends Controller
 
     public function general(Request $request): View
     {
-        // Obtener filtros de fecha (por defecto: semana actual)
-        $fechaInicio = $request->get('fecha_inicio', Carbon::now()->startOfWeek()->format('Y-m-d'));
-        $fechaFin = $request->get('fecha_fin', Carbon::now()->endOfWeek()->format('Y-m-d'));
+        [$fechaInicio, $fechaFin] = $this->resolverRangoFechas($request);
 
-        // Validar que la fecha de inicio no sea mayor que la de fin
-        if (Carbon::parse($fechaInicio)->gt(Carbon::parse($fechaFin))) {
-            $fechaInicio = Carbon::now()->startOfWeek()->format('Y-m-d');
-            $fechaFin = Carbon::now()->endOfWeek()->format('Y-m-d');
+        $datos = $this->obtenerDatosReporteGeneral($fechaInicio, $fechaFin);
+
+        return view('reportes.general', array_merge($datos, [
+            'fechaInicio' => $fechaInicio->format('Y-m-d'),
+            'fechaFin' => $fechaFin->format('Y-m-d'),
+        ]));
+    }
+
+    public function exportGeneral(Request $request)
+    {
+        [$fechaInicio, $fechaFin] = $this->resolverRangoFechas($request);
+
+        $datos = $this->obtenerDatosReporteGeneral($fechaInicio, $fechaFin);
+
+        $datos['fechaInicio'] = $fechaInicio->format('Y-m-d');
+        $datos['fechaFin'] = $fechaFin->format('Y-m-d');
+
+        $nombreArchivo = sprintf(
+            'reporte-general-%s-%s.xlsx',
+            $fechaInicio->format('Ymd'),
+            $fechaFin->format('Ymd')
+        );
+
+        return Excel::download(new ReporteGeneralExport($datos), $nombreArchivo);
+    }
+
+    public function ventasAcumuladas(Request $request): View
+    {
+        [$fechaInicioCarbon, $fechaFinCarbon] = $this->resolverRangoFechasVentas($request);
+
+        [$ventasPorCliente, $totalVentas, $totalGanancia] = $this->obtenerDatosVentasAcumuladas($fechaInicioCarbon, $fechaFinCarbon);
+
+        $fechaInicio = $fechaInicioCarbon->format('Y-m-d');
+        $fechaFin = $fechaFinCarbon->format('Y-m-d');
+
+        return view('reportes.ventas-acumuladas', compact(
+            'ventasPorCliente',
+            'fechaInicio',
+            'fechaFin',
+            'totalVentas',
+            'totalGanancia'
+        ));
+    }
+
+    public function exportVentasAcumuladas(Request $request)
+    {
+        [$fechaInicioCarbon, $fechaFinCarbon] = $this->resolverRangoFechasVentas($request);
+
+        [$ventasPorCliente, $totalVentas, $totalGanancia] = $this->obtenerDatosVentasAcumuladas($fechaInicioCarbon, $fechaFinCarbon);
+
+        $datos = [
+            'fechaInicio' => $fechaInicioCarbon->format('Y-m-d'),
+            'fechaFin' => $fechaFinCarbon->format('Y-m-d'),
+            'ventasPorCliente' => $ventasPorCliente,
+            'totalVentas' => $totalVentas,
+            'totalGanancia' => $totalGanancia,
+        ];
+
+        $nombreArchivo = sprintf(
+            'ventas-acumuladas-%s-%s.xlsx',
+            $fechaInicioCarbon->format('Ymd'),
+            $fechaFinCarbon->format('Ymd')
+        );
+
+        return Excel::download(new VentasAcumuladasExport($datos), $nombreArchivo);
+    }
+
+    private function resolverRangoFechas(Request $request): array
+    {
+        $inicioPorDefecto = Carbon::now()->startOfWeek();
+        $finPorDefecto = Carbon::now()->endOfWeek()->endOfDay();
+
+        $fechaInicioInput = $request->get('fecha_inicio');
+        $fechaFinInput = $request->get('fecha_fin');
+
+        try {
+            $fechaInicio = $fechaInicioInput
+                ? Carbon::createFromFormat('Y-m-d', $fechaInicioInput)->startOfDay()
+                : $inicioPorDefecto->copy();
+        } catch (\Exception $e) {
+            $fechaInicio = $inicioPorDefecto->copy();
         }
 
+        try {
+            $fechaFin = $fechaFinInput
+                ? Carbon::createFromFormat('Y-m-d', $fechaFinInput)->endOfDay()
+                : $finPorDefecto->copy();
+        } catch (\Exception $e) {
+            $fechaFin = $finPorDefecto->copy();
+        }
+
+        if ($fechaInicio->gt($fechaFin)) {
+            $fechaInicio = $inicioPorDefecto->copy();
+            $fechaFin = $finPorDefecto->copy();
+        }
+
+        return [$fechaInicio, $fechaFin];
+    }
+
+    private function resolverRangoFechasVentas(Request $request): array
+    {
+        $inicioPorDefecto = Carbon::now()->startOfMonth();
+        $finPorDefecto = Carbon::now()->endOfMonth()->endOfDay();
+
+        $fechaInicioInput = $request->get('fecha_inicio');
+        $fechaFinInput = $request->get('fecha_fin');
+
+        try {
+            $fechaInicio = $fechaInicioInput
+                ? Carbon::createFromFormat('Y-m-d', $fechaInicioInput)->startOfDay()
+                : $inicioPorDefecto->copy();
+        } catch (\Exception $e) {
+            $fechaInicio = $inicioPorDefecto->copy();
+        }
+
+        try {
+            $fechaFin = $fechaFinInput
+                ? Carbon::createFromFormat('Y-m-d', $fechaFinInput)->endOfDay()
+                : $finPorDefecto->copy();
+        } catch (\Exception $e) {
+            $fechaFin = $finPorDefecto->copy();
+        }
+
+        if ($fechaInicio->gt($fechaFin)) {
+            $fechaInicio = $inicioPorDefecto->copy();
+            $fechaFin = $finPorDefecto->copy();
+        }
+
+        return [$fechaInicio, $fechaFin];
+    }
+
+    private function obtenerDatosReporteGeneral(Carbon $fechaInicio, Carbon $fechaFin): array
+    {
         $reservas = Reserva::with(['cliente', 'vehiculo'])
             ->whereBetween('fecha', [$fechaInicio, $fechaFin])
             ->orderBy('fecha')
             ->orderBy('hora')
             ->get();
 
-        // Calcular totales
         $totalReservas = $reservas->count();
         $totalCantidad = $reservas->sum('cantidad');
-        $totalGanancia = $reservas->sum(function($reserva) {
+        $totalGanancia = $reservas->sum(function ($reserva) {
             return $reserva->cliente->precio_venta * $reserva->cantidad;
         });
 
-        // Agrupar por vehículo
-        $reservasPorVehiculo = $reservas->groupBy('vehiculo_id')->map(function($grupo) {
+        $reservasPorVehiculo = $reservas->groupBy('vehiculo_id')->map(function ($grupo) {
             return [
                 'vehiculo' => $grupo->first()->vehiculo,
                 'cantidad' => $grupo->sum('cantidad'),
-                'ganancia' => $grupo->sum(function($r) {
+                'ganancia' => $grupo->sum(function ($r) {
                     return $r->cliente->precio_venta * $r->cantidad;
                 }),
                 'reservas' => $grupo->count(),
             ];
-        });
+        })->sortByDesc('ganancia');
 
-        // Agrupar por día
         $reservasPorDia = $reservas->groupBy(function ($reserva) {
             return Carbon::parse($reserva->fecha)->format('Y-m-d');
-        })->map(function($grupo) {
+        })->map(function ($grupo) {
             return [
                 'fecha' => Carbon::parse($grupo->first()->fecha),
                 'cantidad' => $grupo->sum('cantidad'),
-                'ganancia' => $grupo->sum(function($r) {
+                'ganancia' => $grupo->sum(function ($r) {
                     return $r->cliente->precio_venta * $r->cantidad;
                 }),
                 'reservas' => $grupo->count(),
@@ -66,53 +191,38 @@ class ReporteController extends Controller
             ];
         })->sortBy('fecha');
 
-        // Agrupar por cliente
-        $reservasPorCliente = $reservas->groupBy('cliente_id')->map(function($grupo) {
+        $reservasPorCliente = $reservas->groupBy('cliente_id')->map(function ($grupo) {
             return [
                 'cliente' => $grupo->first()->cliente,
                 'cantidad' => $grupo->sum('cantidad'),
-                'ganancia' => $grupo->sum(function($r) {
+                'ganancia' => $grupo->sum(function ($r) {
                     return $r->cliente->precio_venta * $r->cantidad;
                 }),
                 'reservas' => $grupo->count(),
             ];
         })->sortByDesc('ganancia');
 
-        return view('reportes.general', compact(
-            'reservas',
-            'fechaInicio',
-            'fechaFin',
-            'totalReservas',
-            'totalCantidad',
-            'totalGanancia',
-            'reservasPorVehiculo',
-            'reservasPorDia',
-            'reservasPorCliente'
-        ));
+        return [
+            'reservas' => $reservas,
+            'totalReservas' => $totalReservas,
+            'totalCantidad' => $totalCantidad,
+            'totalGanancia' => $totalGanancia,
+            'reservasPorVehiculo' => $reservasPorVehiculo,
+            'reservasPorDia' => $reservasPorDia,
+            'reservasPorCliente' => $reservasPorCliente,
+        ];
     }
 
-    public function ventasAcumuladas(Request $request): View
+    private function obtenerDatosVentasAcumuladas(Carbon $fechaInicio, Carbon $fechaFin): array
     {
-        // Obtener filtros de fecha (por defecto: mes actual)
-        $fechaInicio = $request->get('fecha_inicio', Carbon::now()->startOfMonth()->format('Y-m-d'));
-        $fechaFin = $request->get('fecha_fin', Carbon::now()->endOfMonth()->format('Y-m-d'));
-
-        // Validar que la fecha de inicio no sea mayor que la de fin
-        if (Carbon::parse($fechaInicio)->gt(Carbon::parse($fechaFin))) {
-            $fechaInicio = Carbon::now()->startOfMonth()->format('Y-m-d');
-            $fechaFin = Carbon::now()->endOfMonth()->format('Y-m-d');
-        }
-
-        // Obtener todas las reservas en el rango de fechas con relaciones
         $reservas = Reserva::with(['cliente', 'vehiculo'])
             ->whereBetween('fecha', [$fechaInicio, $fechaFin])
             ->orderBy('fecha')
             ->orderBy('hora')
             ->get();
 
-        // Agrupar por cliente
         $ventasPorCliente = [];
-        
+
         foreach ($reservas as $reserva) {
             $clienteId = $reserva->cliente_id;
             $clienteNombre = $reserva->cliente->negocio;
@@ -121,13 +231,10 @@ class ReporteController extends Controller
             $ganancia = $precioVenta * $cantidad;
             $fecha = Carbon::parse($reserva->fecha);
             $mes = $fecha->format('Y-m');
-            
-            // Calcular la semana del mes (1-5)
-            // Día del mes
+
             $diaDelMes = $fecha->day;
-            // Calcular qué semana es (1-5)
             $numeroSemana = ceil($diaDelMes / 7);
-            // Asegurar que esté entre 1 y 5
+
             if ($numeroSemana > 5) {
                 $numeroSemana = 5;
             }
@@ -141,7 +248,6 @@ class ReporteController extends Controller
                 ];
             }
 
-            // Agrupar por mes
             if (!isset($ventasPorCliente[$clienteId]['meses'][$mes])) {
                 $meses = [
                     'January' => 'Enero', 'February' => 'Febrero', 'March' => 'Marzo',
@@ -164,36 +270,25 @@ class ReporteController extends Controller
                 ];
             }
 
-            // Asegurar que el número de semana esté entre 1 y 5
             if ($numeroSemana > 5) {
                 $numeroSemana = 5;
             }
 
-            // Sumar a la semana correspondiente
             $ventasPorCliente[$clienteId]['meses'][$mes]['semanas'][$numeroSemana]['cantidad'] += $cantidad;
             $ventasPorCliente[$clienteId]['meses'][$mes]['semanas'][$numeroSemana]['ganancia'] += $ganancia;
-            
-            // Sumar al total del mes
+
             $ventasPorCliente[$clienteId]['meses'][$mes]['venta_total'] += $cantidad;
             $ventasPorCliente[$clienteId]['meses'][$mes]['ganancia_total'] += $ganancia;
-            
-            // Sumar al total del cliente
+
             $ventasPorCliente[$clienteId]['venta_total'] += $cantidad;
             $ventasPorCliente[$clienteId]['ganancia_total'] += $ganancia;
         }
 
-        // Calcular totales generales
         $totalVentas = $reservas->sum('cantidad');
-        $totalGanancia = $reservas->sum(function($reserva) {
+        $totalGanancia = $reservas->sum(function ($reserva) {
             return $reserva->cliente->precio_venta * $reserva->cantidad;
         });
 
-        return view('reportes.ventas-acumuladas', compact(
-            'ventasPorCliente',
-            'fechaInicio',
-            'fechaFin',
-            'totalVentas',
-            'totalGanancia'
-        ));
+        return [$ventasPorCliente, $totalVentas, $totalGanancia];
     }
 }
