@@ -76,7 +76,6 @@
                                 required 
                                 autofocus 
                                 autocomplete="username"
-                                placeholder="admin@reservas.com"
                                 class="block w-full pl-10 lg:pl-12 pr-3 lg:pr-4 py-3 lg:py-3.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 ease-in-out text-gray-900 placeholder-gray-400 bg-gray-50 hover:bg-white hover:border-gray-300 text-sm lg:text-base"
                             />
                         </div>
