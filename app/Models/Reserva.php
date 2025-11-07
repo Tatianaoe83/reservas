@@ -18,6 +18,7 @@ class Reserva extends Model
 
     protected $casts = [
         'fecha' => 'date',
+        'hora' => 'string', // Mantener como string para comparaciones
     ];
 
     public function cliente(): BelongsTo

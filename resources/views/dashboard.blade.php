@@ -2,16 +2,16 @@
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <div>
-                <h2 class="font-bold text-2xl text-gray-900">
-                    {{ __('Dashboard') }}
-                </h2>
-                <p class="text-sm text-gray-600 mt-1">Sistema de Reservas - Venta de Hielo</p>
+                <h2 class="font-bold text-xl sm:text-2xl text-gray-900">
+            {{ __('Dashboard') }}
+        </h2>
+                <p class="text-xs sm:text-sm text-gray-600 mt-1">Sistema de Reservas - Venta de Hielo</p>
             </div>
         </div>
     </x-slot>
 
-    <div class="py-8">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+    <div class="py-4 sm:py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             @if (session('success'))
                 <div class="mb-6 bg-gradient-to-r from-green-50 to-emerald-50 border-l-4 border-green-500 text-green-800 px-6 py-4 rounded-lg shadow-md flex items-center">
                     <svg class="h-6 w-6 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
@@ -37,7 +37,11 @@
                             </svg>
                         </div>
                         <h3 class="text-xl font-bold text-white mb-1">Clientes</h3>
-                        <p class="text-sm text-blue-100">Gestionar clientes</p>
+                        <p class="text-sm text-blue-100 mb-3">Gestionar clientes</p>
+                        <div class="flex items-center justify-between">
+                            <span class="text-3xl font-black text-white">{{ $totalClientes ?? 0 }}</span>
+                            <span class="text-xs text-blue-100 uppercase tracking-wider">Registros</span>
+                        </div>
                     </div>
                 </a>
 
@@ -55,7 +59,11 @@
                             </svg>
                         </div>
                         <h3 class="text-xl font-bold text-white mb-1">Vehículos</h3>
-                        <p class="text-sm text-green-100">Gestionar vehículos</p>
+                        <p class="text-sm text-green-100 mb-3">Gestionar vehículos</p>
+                        <div class="flex items-center justify-between">
+                            <span class="text-3xl font-black text-white">{{ $totalVehiculos ?? 0 }}</span>
+                            <span class="text-xs text-green-100 uppercase tracking-wider">Registros</span>
+                        </div>
                     </div>
                 </a>
 
@@ -73,7 +81,11 @@
                             </svg>
                         </div>
                         <h3 class="text-xl font-bold text-white mb-1">Reservas</h3>
-                        <p class="text-sm text-purple-100">Gestionar reservas</p>
+                        <p class="text-sm text-purple-100 mb-3">Gestionar reservas</p>
+                        <div class="flex items-center justify-between">
+                            <span class="text-3xl font-black text-white">{{ $totalReservas ?? 0 }}</span>
+                            <span class="text-xs text-purple-100 uppercase tracking-wider">Registros</span>
+                        </div>
                     </div>
                 </a>
 
@@ -91,9 +103,61 @@
                             </svg>
                         </div>
                         <h3 class="text-xl font-bold text-white mb-1">Reportes</h3>
-                        <p class="text-sm text-red-100">Ver reportes</p>
+                        <p class="text-sm text-red-100 mb-3">Ver reportes</p>
+                        <div class="flex items-center justify-between">
+                            <span class="text-lg font-bold text-white">{{ $reservasEstaSemana ?? 0 }}</span>
+                            <span class="text-xs text-red-100 uppercase tracking-wider">Esta Semana</span>
+                        </div>
                     </div>
                 </a>
+            </div>
+
+            <!-- Estadísticas Adicionales -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <!-- Reservas de Hoy -->
+                <div class="bg-gradient-to-br from-cyan-50 to-blue-50 border-2 border-cyan-200 rounded-2xl p-6 shadow-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-semibold text-cyan-700 uppercase tracking-wider mb-2">Reservas Hoy</p>
+                            <p class="text-4xl font-black text-cyan-900">{{ $reservasHoy ?? 0 }}</p>
+                        </div>
+                        <div class="bg-cyan-500 rounded-xl p-4">
+                            <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reservas Esta Semana -->
+                <div class="bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-200 rounded-2xl p-6 shadow-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-semibold text-purple-700 uppercase tracking-wider mb-2">Esta Semana</p>
+                            <p class="text-4xl font-black text-purple-900">{{ $reservasEstaSemana ?? 0 }}</p>
+                        </div>
+                        <div class="bg-purple-500 rounded-xl p-4">
+                            <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reservas Este Mes -->
+                <div class="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 rounded-2xl p-6 shadow-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-semibold text-green-700 uppercase tracking-wider mb-2">Este Mes</p>
+                            <p class="text-4xl font-black text-green-900">{{ $reservasEsteMes ?? 0 }}</p>
+                        </div>
+                        <div class="bg-green-500 rounded-xl p-4">
+                            <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Accesos Rápidos -->
@@ -132,7 +196,7 @@
                                 </div>
                             </div>
                         </a>
-                        <a href="{{ route('reportes.semanal') }}" class="group relative p-6 bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl hover:border-green-400 hover:shadow-lg transition-all duration-300">
+                        <a href="{{ route('reportes.general') }}" class="group relative p-6 bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl hover:border-green-400 hover:shadow-lg transition-all duration-300">
                             <div class="flex items-center">
                                 <div class="flex-shrink-0 bg-green-500 rounded-lg p-3 group-hover:scale-110 transition-transform">
                                     <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -140,8 +204,8 @@
                                     </svg>
                                 </div>
                                 <div class="ml-4">
-                                    <h4 class="text-lg font-bold text-gray-900 group-hover:text-green-600 transition-colors">Reporte Semanal</h4>
-                                    <p class="text-sm text-gray-600 mt-1">Ver reportes semanales</p>
+                                    <h4 class="text-lg font-bold text-gray-900 group-hover:text-green-600 transition-colors">Reporte General</h4>
+                                    <p class="text-sm text-gray-600 mt-1">Ver reportes con filtros</p>
                                 </div>
                             </div>
                         </a>

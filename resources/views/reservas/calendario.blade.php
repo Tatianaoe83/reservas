@@ -1,21 +1,22 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex justify-between items-center">
+        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
             <div>
-                <h2 class="font-bold text-2xl text-gray-900">
+                <h2 class="font-bold text-xl sm:text-2xl text-gray-900">
                     {{ __('Calendario de Reservas') }}
                 </h2>
-                <p class="text-sm text-gray-600 mt-1">Visualiza las reservas por vehículo y horario</p>
+                <p class="text-xs sm:text-sm text-gray-600 mt-1">Visualiza las reservas por vehículo y horario</p>
             </div>
-            <div class="flex space-x-3">
-                <a href="{{ route('reservas.create') }}" class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200">
-                    <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="flex flex-col sm:flex-row gap-2 sm:space-x-3">
+                <a href="{{ route('reservas.create') }}" class="inline-flex items-center justify-center px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 text-sm sm:text-base">
+                    <svg class="h-4 w-4 sm:h-5 sm:w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                     </svg>
-                    Nueva Reserva
+                    <span class="hidden sm:inline">Nueva Reserva</span>
+                    <span class="sm:hidden">Nueva</span>
                 </a>
-                <a href="{{ route('reservas.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition-colors duration-150">
-                    <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <a href="{{ route('reservas.index') }}" class="inline-flex items-center justify-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition-colors duration-150 text-sm sm:text-base">
+                    <svg class="h-4 w-4 sm:h-5 sm:w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
                     Volver
@@ -116,15 +117,15 @@
         })->filter()->values()->toArray();
     @endphp
 
-    <div class="py-8 bg-gradient-to-br from-gray-50 to-white">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+    <div class="py-4 sm:py-8 bg-gradient-to-br from-gray-50 to-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
                 <!-- Sidebar con información -->
-                <div class="space-y-6">
+                <div class="space-y-4 sm:space-y-6 lg:order-1 order-2">
                     <!-- Resumen -->
-                    <div class="bg-white shadow-xl rounded-2xl p-6 border border-gray-100">
-                        <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
-                            <svg class="h-5 w-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="bg-white shadow-xl rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-gray-100">
+                        <h3 class="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4 flex items-center">
+                            <svg class="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                             </svg>
                             Resumen
@@ -152,9 +153,9 @@
                     </div>
 
                     <!-- Leyenda de Vehículos -->
-                    <div class="bg-white shadow-xl rounded-2xl p-6 border border-gray-100">
-                        <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
-                            <svg class="h-5 w-5 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="bg-white shadow-xl rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-gray-100">
+                        <h3 class="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4 flex items-center">
+                            <svg class="h-4 w-4 sm:h-5 sm:w-5 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
                             </svg>
                             Vehículos
@@ -183,23 +184,23 @@
                     </div>
 
                     <!-- Información -->
-                    <div class="bg-gradient-to-br from-blue-600 to-indigo-700 shadow-xl rounded-2xl p-6 text-white">
-                        <h3 class="text-lg font-bold mb-2 flex items-center">
-                            <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="bg-gradient-to-br from-blue-600 to-indigo-700 shadow-xl rounded-xl sm:rounded-2xl p-4 sm:p-6 text-white">
+                        <h3 class="text-base sm:text-lg font-bold mb-2 flex items-center">
+                            <svg class="h-4 w-4 sm:h-5 sm:w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                             Información
                         </h3>
-                        <p class="text-sm text-blue-100 leading-relaxed mt-2">
+                        <p class="text-xs sm:text-sm text-blue-100 leading-relaxed mt-2">
                             Haz clic en cualquier reserva para editarla. Los colores identifican cada vehículo. Cambia la vista usando los botones en la parte superior.
                         </p>
                     </div>
                 </div>
 
                 <!-- Calendario Principal -->
-                <div class="lg:col-span-3">
-                    <div class="bg-white shadow-xl rounded-2xl border border-gray-100 overflow-hidden">
-                        <div id="calendar" style="min-height: 700px; padding: 20px;"></div>
+                <div class="lg:col-span-3 lg:order-2 order-1">
+                    <div class="bg-white shadow-xl rounded-xl sm:rounded-2xl border border-gray-100 overflow-hidden">
+                        <div id="calendar" class="p-2 sm:p-4 lg:p-6" style="min-height: 500px;"></div>
                     </div>
                 </div>
             </div>
@@ -230,9 +231,33 @@
             border-color: #1d4ed8 !important;
         }
         .fc-toolbar-title {
-            font-size: 1.5rem !important;
+            font-size: 1.25rem !important;
             font-weight: 700 !important;
             color: #111827 !important;
+        }
+        @media (min-width: 640px) {
+            .fc-toolbar-title {
+                font-size: 1.5rem !important;
+            }
+        }
+        .fc-toolbar {
+            flex-direction: column !important;
+            gap: 0.5rem !important;
+        }
+        .fc-toolbar-chunk {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.25rem;
+        }
+        @media (min-width: 768px) {
+            .fc-toolbar {
+                flex-direction: row !important;
+            }
+        }
+        .fc-button {
+            padding: 0.375rem 0.75rem !important;
+            font-size: 0.875rem !important;
         }
         .fc-col-header-cell {
             background-color: #f9fafb !important;

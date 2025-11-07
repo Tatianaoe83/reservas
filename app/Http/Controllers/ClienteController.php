@@ -25,9 +25,12 @@ class ClienteController extends Controller
         $validated = $request->validate([
             'negocio' => 'required|string|max:255',
             'direccion' => 'required|string|max:255',
-            'telefono' => 'required|string|max:20',
+            'telefono' => 'required|string|size:10|regex:/^[0-9]+$/',
             'contacto' => 'required|string|max:255',
             'precio_venta' => 'required|numeric|min:0',
+        ], [
+            'telefono.size' => 'El teléfono debe tener exactamente 10 dígitos.',
+            'telefono.regex' => 'El teléfono solo puede contener números.',
         ]);
 
         Cliente::create($validated);
@@ -51,9 +54,12 @@ class ClienteController extends Controller
         $validated = $request->validate([
             'negocio' => 'required|string|max:255',
             'direccion' => 'required|string|max:255',
-            'telefono' => 'required|string|max:20',
+            'telefono' => 'required|string|size:10|regex:/^[0-9]+$/',
             'contacto' => 'required|string|max:255',
             'precio_venta' => 'required|numeric|min:0',
+        ], [
+            'telefono.size' => 'El teléfono debe tener exactamente 10 dígitos.',
+            'telefono.regex' => 'El teléfono solo puede contener números.',
         ]);
 
         $cliente->update($validated);

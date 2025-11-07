@@ -72,7 +72,10 @@ class ReservaController extends Controller
             ->exists();
 
         if ($existeReserva) {
-            return back()->withErrors(['hora' => 'Ya existe una reserva para este vehículo en la fecha y hora seleccionada.'])->withInput();
+            $vehiculo = Vehiculo::find($validated['vehiculo_id']);
+            return back()->withErrors([
+                'hora' => "El vehículo '{$vehiculo->nombre}' ya tiene una reserva programada para el {$validated['fecha']} a las {$validated['hora']}. Por favor, seleccione otro horario o vehículo."
+            ])->withInput();
         }
 
         Reserva::create($validated);
@@ -130,7 +133,10 @@ class ReservaController extends Controller
             ->exists();
 
         if ($existeReserva) {
-            return back()->withErrors(['hora' => 'Ya existe una reserva para este vehículo en la fecha y hora seleccionada.'])->withInput();
+            $vehiculo = Vehiculo::find($validated['vehiculo_id']);
+            return back()->withErrors([
+                'hora' => "El vehículo '{$vehiculo->nombre}' ya tiene una reserva programada para el {$validated['fecha']} a las {$validated['hora']}. Por favor, seleccione otro horario o vehículo."
+            ])->withInput();
         }
 
         $reserva->update($validated);
@@ -145,6 +151,84 @@ class ReservaController extends Controller
 
         return redirect()->route('reservas.index')
             ->with('success', 'Reserva eliminada exitosamente.');
+    }
+
+    /**
+     * Obtener horarios disponibles para un vehículo en una fecha específica
+     */
+    public function getHorariosDisponibles(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'vehiculo_id' => 'required|exists:vehiculos,id',
+                'fecha' => 'required|date',
+                'reserva_id' => 'nullable|exists:reservas,id', // Para edición
+            ]);
+
+            // Obtener todas las reservas para el vehículo en la fecha
+            $query = Reserva::where('vehiculo_id', $validated['vehiculo_id'])
+                ->where('fecha', $validated['fecha']);
+
+            // Si hay una reserva_id, excluirla (para edición)
+            if ($request->has('reserva_id') && $request->reserva_id) {
+                $query->where('id', '!=', $request->reserva_id);
+            }
+
+            // Obtener las horas ocupadas y normalizarlas al formato H:i
+            $reservas = $query->get()->map(function($reserva) {
+                $hora = $reserva->hora;
+                
+                // Normalizar el formato de hora a H:i
+                if (is_string($hora)) {
+                    // Si viene como "07:30:00", tomar solo "07:30"
+                    if (strlen($hora) >= 5) {
+                        return substr($hora, 0, 5);
+                    }
+                    return $hora;
+                } elseif ($hora instanceof \Carbon\Carbon || $hora instanceof \DateTime) {
+                    return $hora->format('H:i');
+                }
+                
+                return $hora;
+            })->filter()->unique()->values()->toArray();
+
+            // Generar todos los horarios posibles
+            $todosHorarios = $this->generarHorarios();
+            
+            // Filtrar horarios ocupados (comparación estricta)
+            $horariosDisponibles = array_filter($todosHorarios, function($horario) use ($reservas) {
+                // Comparación estricta, asegurando que ambos sean strings en formato H:i
+                return !in_array($horario, $reservas, true);
+            });
+
+            // Asegurarnos de que los arrays están en el formato correcto
+            $horariosDisponibles = array_values($horariosDisponibles);
+            $horariosOcupados = array_values(array_unique($reservas));
+
+            // Log para depuración (remover en producción si es necesario)
+            \Log::debug('Horarios disponibles', [
+                'vehiculo_id' => $validated['vehiculo_id'],
+                'fecha' => $validated['fecha'],
+                'horarios_ocupados' => $horariosOcupados,
+                'total_disponibles' => count($horariosDisponibles),
+                'total_ocupados' => count($horariosOcupados),
+            ]);
+
+            return response()->json([
+                'horarios' => $horariosDisponibles,
+                'horarios_ocupados' => $horariosOcupados
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'error' => 'Error de validación',
+                'messages' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Error al obtener horarios disponibles',
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
