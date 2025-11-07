@@ -5,3 +5,51 @@
 [x-cloak] {
     display: none;
 }
+
+.fc {
+    font-family: inherit;
+}
+
+.fc-button {
+    @apply bg-blue-600 hover:bg-blue-700 border-blue-600 hover:border-blue-700 rounded-lg font-semibold px-4 py-2 transition-colors;
+}
+
+.fc-button-primary:not(:disabled).fc-button-active {
+    @apply bg-blue-700 border-blue-700;
+}
+
+.fc-button-primary:not(:disabled):hover {
+    @apply bg-blue-700 border-blue-700;
+}
+
+.fc-toolbar-title {
+    @apply text-2xl font-bold text-gray-900;
+}
+
+.fc-col-header-cell {
+    @apply bg-gray-50 p-3 font-bold text-gray-700;
+}
+
+.fc-daygrid-day {
+    @apply border-gray-200;
+}
+
+.fc-day-today {
+    @apply bg-blue-50;
+}
+
+.fc-event {
+    @apply border-none rounded-lg px-2 py-1 cursor-pointer transition-transform hover:scale-105;
+}
+
+.fc-event-title {
+    @apply font-semibold;
+}
+
+.fc-timeGridWeek-view .fc-event-time {
+    @apply font-bold;
+}
+
+.fc-list-event:hover td {
+    @apply bg-gray-50;
+}

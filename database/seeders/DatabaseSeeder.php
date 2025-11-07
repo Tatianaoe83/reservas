@@ -31,5 +31,18 @@ class DatabaseSeeder extends Seeder
         $this->command->info('Email: admin@reservas.com');
         $this->command->info('Password: admin123');
         $this->command->warn('¡IMPORTANTE! Cambia la contraseña después del primer inicio de sesión.');
+        
+        $this->command->newLine();
+        $this->command->info('Ejecutando seeders de datos...');
+        
+        // Ejecutar seeders en orden
+        $this->call([
+            ClienteSeeder::class,
+            VehiculoSeeder::class,
+            ReservaSeeder::class,
+        ]);
+        
+        $this->command->newLine();
+        $this->command->info('¡Todos los seeders se ejecutaron correctamente!');
     }
 }
