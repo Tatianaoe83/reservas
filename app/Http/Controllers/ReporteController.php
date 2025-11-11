@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Exports\ReporteGeneralExport;
+use App\Exports\ReporteInsumosExport;
 use App\Exports\VentasAcumuladasExport;
 use App\Models\Reserva;
+use App\Models\Insumo;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Carbon\Carbon;
@@ -15,6 +17,93 @@ class ReporteController extends Controller
     public function index(): View
     {
         return view('reportes.index');
+    }
+
+    public function insumos(Request $request): View
+    {
+        [$fechaInicio, $fechaFin] = $this->resolverRangoFechas($request);
+
+        $datos = $this->obtenerDatosReporteInsumos($fechaInicio, $fechaFin);
+
+        return view('reportes.insumos', array_merge($datos, [
+            'fechaInicio' => $fechaInicio->format('Y-m-d'),
+            'fechaFin' => $fechaFin->format('Y-m-d'),
+        ]));
+    }
+
+    public function exportInsumos(Request $request)
+    {
+        [$fechaInicio, $fechaFin] = $this->resolverRangoFechas($request);
+
+        $datos = $this->obtenerDatosReporteInsumos($fechaInicio, $fechaFin);
+
+        $datos['fechaInicio'] = $fechaInicio;
+        $datos['fechaFin'] = $fechaFin;
+
+        $nombreArchivo = sprintf(
+            'reporte-insumos-%s-%s.xlsx',
+            $fechaInicio->format('Ymd'),
+            $fechaFin->format('Ymd')
+        );
+
+        return Excel::download(new ReporteInsumosExport($datos), $nombreArchivo);
+    }
+
+    public function rentabilidad(Request $request): View
+    {
+        [$fechaInicio, $fechaFin] = $this->resolverRangoFechas($request);
+
+        $datosReservas = $this->obtenerDatosReporteGeneral($fechaInicio, $fechaFin);
+        $datosInsumos = $this->obtenerDatosReporteInsumos($fechaInicio, $fechaFin);
+
+        $totalVentas = $datosReservas['totalGanancia'];
+        $totalCostos = $datosInsumos['totalGeneral'];
+        $utilidad = $totalVentas - $totalCostos;
+        $margen = $totalVentas > 0 ? round(($utilidad / $totalVentas) * 100, 2) : 0;
+
+        $costosPorCategoria = collect($datosInsumos['secciones'])
+            ->map(function ($seccion, $categoria) {
+                return [
+                    'categoria' => $categoria,
+                    'importe' => $seccion['totales']['importe'],
+                    'cantidad' => $seccion['totales']['cantidad'],
+                    'consumo' => $seccion['totales']['consumo_combustible'],
+                ];
+            })
+            ->values();
+
+        $insumosAgrupadosPorDia = collect($datosInsumos['secciones'])
+            ->flatMap(fn ($seccion) => $seccion['items'])
+            ->filter(fn ($insumo) => !is_null($insumo->fecha))
+            ->groupBy(fn ($insumo) => $insumo->fecha->format('Y-m-d'))
+            ->map(fn ($items) => $items->sum(fn ($insumo) => $insumo->importe_semanal));
+
+        $comparativoDiario = $datosReservas['reservasPorDia']->map(function ($dia) use ($insumosAgrupadosPorDia) {
+            $fechaClave = $dia['fecha']->format('Y-m-d');
+            $costos = $insumosAgrupadosPorDia->get($fechaClave, 0);
+            $ingresos = $dia['ganancia'];
+            $utilidad = $ingresos - $costos;
+
+            return [
+                'fecha' => $dia['fecha'],
+                'ingresos' => $ingresos,
+                'costos' => $costos,
+                'utilidad' => $utilidad,
+            ];
+        })->values();
+
+        return view('reportes.rentabilidad', [
+            'fechaInicio' => $fechaInicio->format('Y-m-d'),
+            'fechaFin' => $fechaFin->format('Y-m-d'),
+            'totalVentas' => $totalVentas,
+            'totalCostos' => $totalCostos,
+            'utilidad' => $utilidad,
+            'margen' => $margen,
+            'costosPorCategoria' => $costosPorCategoria,
+            'comparativoDiario' => $comparativoDiario,
+            'datosReservas' => $datosReservas,
+            'datosInsumos' => $datosInsumos,
+        ]);
     }
 
     public function general(Request $request): View
@@ -290,5 +379,37 @@ class ReporteController extends Controller
         });
 
         return [$ventasPorCliente, $totalVentas, $totalGanancia];
+    }
+
+    private function obtenerDatosReporteInsumos(Carbon $fechaInicio, Carbon $fechaFin): array
+    {
+        $insumos = Insumo::whereBetween('fecha', [$fechaInicio->toDateString(), $fechaFin->toDateString()])
+            ->orderBy('categoria')
+            ->orderBy('nombre')
+            ->get();
+
+        $secciones = collect(Insumo::CATEGORIAS)
+            ->mapWithKeys(function (string $categoria) use ($insumos) {
+                $items = $insumos->where('categoria', $categoria);
+
+                return [$categoria => [
+                    'items' => $items,
+                    'totales' => [
+                        'cantidad' => $items->sum('cantidad'),
+                        'sueldo' => $items->sum('sueldo_semana'),
+                        'importe' => $items->sum(fn (Insumo $insumo) => $insumo->importe_semanal),
+                        'consumo_combustible' => $items->sum(fn (Insumo $insumo) => $insumo->esCombustible() ? ($insumo->litros_consumidos ?? 0) : 0),
+                    ],
+                ]];
+            });
+
+        $totalGeneral = $secciones->sum(fn ($seccion) => $seccion['totales']['importe']);
+        $totalCombustibleLitros = $secciones['Combustible']['totales']['consumo_combustible'] ?? 0;
+
+        return [
+            'secciones' => $secciones,
+            'totalGeneral' => $totalGeneral,
+            'totalCombustibleLitros' => $totalCombustibleLitros,
+        ];
     }
 }

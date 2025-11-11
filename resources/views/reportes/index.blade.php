@@ -7,7 +7,7 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 <!-- Reporte General (Unificado) -->
                 <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6 hover:shadow-2xl transition-shadow">
                     <div class="flex items-center mb-4">
@@ -53,6 +53,54 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                         Ver Ventas Acumuladas
+                    </a>
+                </div>
+
+                <!-- Reporte de Insumos -->
+                <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6 hover:shadow-2xl transition-shadow">
+                    <div class="flex items-center mb-4">
+                        <div class="flex-shrink-0 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg p-3">
+                            <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h18M5 11h14M6 15h12M9 19h6" />
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <h3 class="text-xl font-bold text-gray-900">Reporte de Insumos</h3>
+                            <p class="text-sm text-gray-500">Desglose semanal por categorías y totales</p>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-4">
+                        Visualiza los insumos registrados por fecha, con totales por categoría y cálculo de combustible.
+                    </p>
+                    <a href="{{ route('reportes.insumos') }}" class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold py-3 px-6 rounded-lg inline-flex items-center justify-center transition-all transform hover:-translate-y-1">
+                        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Ver Reporte de Insumos
+                    </a>
+                </div>
+
+                <!-- Reporte Rentabilidad -->
+                <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6 hover:shadow-2xl transition-shadow">
+                    <div class="flex items-center mb-4">
+                        <div class="flex-shrink-0 bg-gradient-to-br from-orange-500 to-rose-500 rounded-lg p-3">
+                            <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h11M9 21V3m4 18 7-9m0 0-7-9" />
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <h3 class="text-xl font-bold text-gray-900">Ingresos vs Costos</h3>
+                            <p class="text-sm text-gray-500">Compara ventas de reservas contra insumos</p>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-4">
+                        Analiza si el negocio está generando utilidad o pérdidas considerando los insumos registrados en el mismo periodo.
+                    </p>
+                    <a href="{{ route('reportes.rentabilidad') }}" class="w-full bg-gradient-to-r from-orange-500 to-rose-500 hover:from-orange-600 hover:to-rose-600 text-white font-bold py-3 px-6 rounded-lg inline-flex items-center.justify-center transition-all transform hover:-translate-y-1">
+                        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a5 5 0 00-10 0v2a3 3 0 00-3 3v5a3 3 0 003 3h10a3 3 0 003-3v-5a3 3 0 00-3-3z" />
+                        </svg>
+                        Ver Ingresos vs Costos
                     </a>
                 </div>
             </div>

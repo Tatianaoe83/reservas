@@ -24,6 +24,9 @@
                     <x-nav-link href="{{ route('reservas.index') }}" :active="request()->routeIs('reservas.*')">
                         {{ __('Reservas') }}
                     </x-nav-link>
+                    <x-nav-link href="{{ route('insumos.index') }}" :active="request()->routeIs('insumos.*')">
+                        {{ __('Insumos') }}
+                    </x-nav-link>
                     <x-nav-link href="{{ route('reportes.index') }}" :active="request()->routeIs('reportes.*')">
                         {{ __('Reportes') }}
                     </x-nav-link>
@@ -162,6 +165,9 @@
             </x-responsive-nav-link>
             <x-responsive-nav-link href="{{ route('reservas.index') }}" :active="request()->routeIs('reservas.*')">
                 {{ __('Reservas') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link href="{{ route('insumos.index') }}" :active="request()->routeIs('insumos.*')">
+                {{ __('Insumos') }}
             </x-responsive-nav-link>
             <x-responsive-nav-link href="{{ route('reportes.index') }}" :active="request()->routeIs('reportes.*')">
                 {{ __('Reportes') }}

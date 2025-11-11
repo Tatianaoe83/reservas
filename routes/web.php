@@ -5,6 +5,7 @@ use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\VehiculoController;
 use App\Http\Controllers\ReservaController;
 use App\Http\Controllers\ReporteController;
+use App\Http\Controllers\InsumoController;
 use App\Models\Cliente;
 use App\Models\Vehiculo;
 use App\Models\Reserva;
@@ -53,5 +54,11 @@ Route::middleware([
         Route::get('general/export', [ReporteController::class, 'exportGeneral'])->name('general.export');
         Route::get('ventas-acumuladas', [ReporteController::class, 'ventasAcumuladas'])->name('ventas-acumuladas');
         Route::get('ventas-acumuladas/export', [ReporteController::class, 'exportVentasAcumuladas'])->name('ventas-acumuladas.export');
+        Route::get('insumos', [ReporteController::class, 'insumos'])->name('insumos');
+        Route::get('insumos/export', [ReporteController::class, 'exportInsumos'])->name('insumos.export');
+        Route::get('rentabilidad', [ReporteController::class, 'rentabilidad'])->name('rentabilidad');
     });
+
+    // Rutas de Insumos
+    Route::resource('insumos', InsumoController::class);
 });
