@@ -141,6 +141,21 @@
                             @enderror
                         </div>
 
+                        <div>
+                            <label for="estatus" class="block text-sm font-medium text-gray-700">Estatus *</label>
+                            <select name="estatus" id="estatus" required
+                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                @foreach(\App\Models\Reserva::ESTATUS as $key => $label)
+                                    <option value="{{ $key }}" {{ old('estatus', \App\Models\Reserva::ESTATUS_PROGRAMADO) == $key ? 'selected' : '' }}>
+                                        {{ $label }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('estatus')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
                         <div class="md:col-span-2">
                             <label for="observaciones" class="block text-sm font-medium text-gray-700">Observaciones</label>
                             <textarea name="observaciones" id="observaciones" rows="3"

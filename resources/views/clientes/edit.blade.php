@@ -72,6 +72,22 @@
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
+
+                        <div>
+                            <label for="producto_id" class="block text-sm font-medium text-gray-700">Producto</label>
+                            <select name="producto_id" id="producto_id"
+                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <option value="">Seleccione un producto (opcional)</option>
+                                @foreach($productos as $producto)
+                                    <option value="{{ $producto->id }}" {{ old('producto_id', $cliente->producto_id) == $producto->id ? 'selected' : '' }}>
+                                        {{ $producto->nombre }} ({{ number_format($producto->cantidad) }})
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('producto_id')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
                     </div>
 
                     <div class="mt-6 flex justify-end space-x-3">

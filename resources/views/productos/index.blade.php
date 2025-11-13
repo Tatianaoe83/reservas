@@ -3,15 +3,15 @@
         <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
             <div>
                 <h2 class="font-bold text-xl sm:text-2xl text-gray-900">
-                    {{ __('Clientes') }}
+                    {{ __('Productos') }}
                 </h2>
-                <p class="text-xs sm:text-sm text-gray-600 mt-1">Gestiona tu catálogo de clientes</p>
+                <p class="text-xs sm:text-sm text-gray-600 mt-1">Gestiona los productos disponibles con su nombre y cantidad.</p>
             </div>
-            <a href="{{ route('clientes.create') }}" class="inline-flex items-center justify-center px-4 py-2 sm:px-6 sm:py-3 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 text-sm sm:text-base">
+            <a href="{{ route('productos.create') }}" class="inline-flex items-center justify-center px-4 py-2 sm:px-6 sm:py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 text-sm sm:text-base">
                 <svg class="h-4 w-4 sm:h-5 sm:w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                 </svg>
-                <span class="hidden sm:inline">Nuevo Cliente</span>
+                <span class="hidden sm:inline">Nuevo Producto</span>
                 <span class="sm:hidden">Nuevo</span>
             </a>
         </div>
@@ -30,59 +30,44 @@
 
             <div class="bg-white overflow-hidden shadow-xl rounded-2xl border border-gray-100">
                 <div class="p-6">
-                    <table id="clientesTable" class="display nowrap" style="width:100%">
+                    <table id="productosTable" class="display nowrap" style="width:100%">
                         <thead>
                             <tr>
-                                <th>Negocio</th>
-                                <th>Dirección</th>
-                                <th>Teléfono</th>
-                                <th>Contacto</th>
-                                <th>Producto</th>
-                                <th>Precio Venta</th>
+                                <th>Nombre</th>
+                                <th>Cantidad</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse($clientes as $cliente)
+                            @foreach ($productos as $producto)
                                 <tr>
-                                    <td>
-                                        <div class="text-sm font-bold text-gray-900">{{ $cliente->negocio }}</div>
+                                    <td class="text-sm font-bold text-gray-900">
+                                        {{ $producto->nombre }}
                                     </td>
-                                    <td>
-                                        <div class="text-sm text-gray-600">{{ $cliente->direccion }}</div>
-                                    </td>
-                                    <td>
-                                        <div class="text-sm text-gray-600">{{ $cliente->telefono }}</div>
-                                    </td>
-                                    <td>
-                                        <div class="text-sm text-gray-600">{{ $cliente->contacto }}</div>
-                                    </td>
-                                    <td>
-                                        @if($cliente->producto)
-                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-blue-50 text-blue-700">
-                                                {{ $cliente->producto->nombre }}
-                                            </span>
-                                        @else
-                                            <span class="text-sm text-gray-400">Sin producto</span>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold bg-green-100 text-green-800">
-                                            ${{ number_format($cliente->precio_venta, 2) }}
+                                    <td class="text-sm text-gray-600">
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-blue-50 text-blue-700">
+                                            {{ number_format($producto->cantidad) }}
                                         </span>
                                     </td>
                                     <td>
                                         <div class="flex items-center space-x-3">
-                                            <a href="{{ route('clientes.edit', $cliente) }}" class="inline-flex items-center px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 font-semibold transition-colors duration-150">
+                                            <a href="{{ route('productos.show', $producto) }}" class="inline-flex items-center px-3 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 font-semibold transition-colors duration-150">
+                                                <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                </svg>
+                                                Ver
+                                            </a>
+                                            <a href="{{ route('productos.edit', $producto) }}" class="inline-flex items-center px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 font-semibold transition-colors duration-150">
                                                 <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                                 </svg>
                                                 Editar
                                             </a>
-                                            <form action="{{ route('clientes.destroy', $cliente) }}" method="POST" class="inline">
+                                            <form action="{{ route('productos.destroy', $producto) }}" method="POST" class="inline">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="inline-flex items-center px-3 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 font-semibold transition-colors duration-150" onclick="return confirm('¿Está seguro de eliminar este cliente?')">
+                                                <button type="submit" class="inline-flex items-center px-3 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 font-semibold transition-colors duration-150" onclick="return confirm('¿Deseas eliminar este producto?')">
                                                     <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                     </svg>
@@ -92,23 +77,28 @@
                                         </div>
                                     </td>
                                 </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="7" class="text-center py-8">
-                                        <div class="flex flex-col items-center">
-                                            <svg class="h-16 w-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                                            </svg>
-                                            <p class="text-lg font-semibold text-gray-500">No hay clientes registrados</p>
-                                            <p class="text-sm text-gray-400 mt-1">Comienza agregando tu primer cliente</p>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endforelse
+                            @endforeach
                         </tbody>
                     </table>
                 </div>
             </div>
+
+            @if ($productos->isEmpty())
+                <div class="mt-8 bg-white border border-dashed border-gray-200 rounded-2xl p-10 text-center">
+                    <div class="flex flex-col items-center space-y-4">
+                        <svg class="h-16 w-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                        </svg>
+                        <div>
+                            <p class="text-lg font-semibold text-gray-600">No hay productos registrados</p>
+                            <p class="text-sm text-gray-400 mt-1">Comienza agregando tu primer producto.</p>
+                        </div>
+                        <a href="{{ route('productos.create') }}" class="inline-flex items-center px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 font-semibold transition-colors duration-150">
+                            Registrar producto
+                        </a>
+                    </div>
+                </div>
+            @endif
         </div>
     </div>
 
@@ -164,7 +154,7 @@
     <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
     <script>
         $(document).ready(function() {
-            $('#clientesTable').DataTable({
+            $('#productosTable').DataTable({
                 language: {
                     url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json'
                 },
@@ -173,10 +163,11 @@
                 lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Todos"]],
                 order: [[0, 'asc']],
                 columnDefs: [
-                    { orderable: false, targets: 6 } // Deshabilitar ordenamiento en columna de acciones
+                    { orderable: false, targets: 2 }
                 ]
             });
         });
     </script>
     @endpush
 </x-app-layout>
+

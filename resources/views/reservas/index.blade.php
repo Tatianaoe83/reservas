@@ -46,6 +46,7 @@
                                 <th>Cliente</th>
                                 <th>Vehículo</th>
                                 <th>Cantidad</th>
+                                <th>Estatus</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
@@ -83,6 +84,19 @@
                                         </span>
                                     </td>
                                     <td>
+                                        @php
+                                            $estatusColors = [
+                                                'programado' => 'bg-yellow-100 text-yellow-800',
+                                                'entregado' => 'bg-green-100 text-green-800',
+                                                'no entregado' => 'bg-red-100 text-red-800',
+                                            ];
+                                            $color = $estatusColors[$reserva->estatus ?? 'programado'] ?? 'bg-gray-100 text-gray-800';
+                                        @endphp
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold {{ $color }}">
+                                            {{ \App\Models\Reserva::ESTATUS[$reserva->estatus ?? 'programado'] ?? 'Programado' }}
+                                        </span>
+                                    </td>
+                                    <td>
                                         <div class="flex items-center space-x-3">
                                             <a href="{{ route('reservas.edit', $reserva) }}" class="inline-flex items-center px-3 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 font-semibold transition-colors duration-150">
                                                 <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -105,7 +119,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6" class="text-center py-8">
+                                    <td colspan="7" class="text-center py-8">
                                         <div class="flex flex-col items-center">
                                             <svg class="h-16 w-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -184,7 +198,7 @@
                 lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Todos"]],
                 order: [[0, 'asc'], [1, 'asc']], // Ordenar por fecha y luego por hora
                 columnDefs: [
-                    { orderable: false, targets: 5 }, // Deshabilitar ordenamiento en columna de acciones
+                    { orderable: false, targets: 6 }, // Deshabilitar ordenamiento en columna de acciones
                     { type: 'date', targets: 0 } // Tipo fecha para la columna de fecha
                 ]
             });

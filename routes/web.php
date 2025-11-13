@@ -6,6 +6,7 @@ use App\Http\Controllers\VehiculoController;
 use App\Http\Controllers\ReservaController;
 use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\InsumoController;
+use App\Http\Controllers\ProductoController;
 use App\Models\Cliente;
 use App\Models\Vehiculo;
 use App\Models\Reserva;
@@ -61,4 +62,7 @@ Route::middleware([
 
     // Rutas de Insumos
     Route::resource('insumos', InsumoController::class);
+
+    // Rutas de Productos
+    Route::resource('productos', ProductoController::class);
 });

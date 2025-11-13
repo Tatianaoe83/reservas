@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Cliente extends Model
 {
@@ -13,6 +14,7 @@ class Cliente extends Model
         'telefono',
         'contacto',
         'precio_venta',
+        'producto_id',
     ];
 
     protected $casts = [
@@ -22,5 +24,10 @@ class Cliente extends Model
     public function reservas(): HasMany
     {
         return $this->hasMany(Reserva::class);
+    }
+
+    public function producto(): BelongsTo
+    {
+        return $this->belongsTo(Producto::class);
     }
 }

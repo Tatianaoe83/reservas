@@ -7,6 +7,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Reserva extends Model
 {
+    public const ESTATUS_PROGRAMADO = 'programado';
+    public const ESTATUS_ENTREGADO = 'entregado';
+    public const ESTATUS_NO_ENTREGADO = 'no entregado';
+
+    public const ESTATUS = [
+        self::ESTATUS_PROGRAMADO => 'Programado',
+        self::ESTATUS_ENTREGADO => 'Entregado',
+        self::ESTATUS_NO_ENTREGADO => 'No Entregado',
+    ];
+
     protected $fillable = [
         'cliente_id',
         'vehiculo_id',
@@ -14,6 +24,7 @@ class Reserva extends Model
         'hora',
         'cantidad',
         'observaciones',
+        'estatus',
     ];
 
     protected $casts = [

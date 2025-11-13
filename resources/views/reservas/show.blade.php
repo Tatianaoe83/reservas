@@ -29,6 +29,22 @@
                         <label class="block text-sm font-medium text-gray-700">Cantidad</label>
                         <p class="mt-1 text-sm text-gray-900">{{ $reserva->cantidad }}</p>
                     </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Estatus</label>
+                        @php
+                            $estatusColors = [
+                                'programado' => 'bg-yellow-100 text-yellow-800',
+                                'entregado' => 'bg-green-100 text-green-800',
+                                'no entregado' => 'bg-red-100 text-red-800',
+                            ];
+                            $color = $estatusColors[$reserva->estatus ?? 'programado'] ?? 'bg-gray-100 text-gray-800';
+                        @endphp
+                        <p class="mt-1">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold {{ $color }}">
+                                {{ \App\Models\Reserva::ESTATUS[$reserva->estatus ?? 'programado'] ?? 'Programado' }}
+                            </span>
+                        </p>
+                    </div>
                     @if($reserva->observaciones)
                     <div class="md:col-span-2">
                         <label class="block text-sm font-medium text-gray-700">Observaciones</label>

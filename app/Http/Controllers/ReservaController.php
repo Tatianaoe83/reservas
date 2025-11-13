@@ -48,6 +48,7 @@ class ReservaController extends Controller
             'hora' => 'required|date_format:H:i',
             'cantidad' => 'required|integer|min:1',
             'observaciones' => 'nullable|string',
+            'estatus' => 'required|in:' . implode(',', array_keys(Reserva::ESTATUS)),
         ]);
 
         // Validar que el horario esté dentro del rango permitido (7:00 AM - 7:00 PM)
@@ -76,6 +77,11 @@ class ReservaController extends Controller
             return back()->withErrors([
                 'hora' => "El vehículo '{$vehiculo->nombre}' ya tiene una reserva programada para el {$validated['fecha']} a las {$validated['hora']}. Por favor, seleccione otro horario o vehículo."
             ])->withInput();
+        }
+
+        // Si no se especifica estatus, usar 'programado' por defecto
+        if (!isset($validated['estatus'])) {
+            $validated['estatus'] = Reserva::ESTATUS_PROGRAMADO;
         }
 
         Reserva::create($validated);
@@ -108,6 +114,7 @@ class ReservaController extends Controller
             'hora' => 'required|date_format:H:i',
             'cantidad' => 'required|integer|min:1',
             'observaciones' => 'nullable|string',
+            'estatus' => 'required|in:' . implode(',', array_keys(Reserva::ESTATUS)),
         ]);
 
         // Validar que el horario esté dentro del rango permitido
