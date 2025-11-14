@@ -245,6 +245,7 @@ class ReporteController extends Controller
     {
         $reservas = Reserva::with(['cliente', 'vehiculo'])
             ->whereBetween('fecha', [$fechaInicio, $fechaFin])
+            ->where('estatus', Reserva::ESTATUS_ENTREGADO)
             ->orderBy('fecha')
             ->orderBy('hora')
             ->get();
@@ -306,6 +307,7 @@ class ReporteController extends Controller
     {
         $reservas = Reserva::with(['cliente', 'vehiculo'])
             ->whereBetween('fecha', [$fechaInicio, $fechaFin])
+            ->where('estatus', Reserva::ESTATUS_ENTREGADO)
             ->orderBy('fecha')
             ->orderBy('hora')
             ->get();

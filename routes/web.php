@@ -33,7 +33,20 @@ Route::middleware([
             ->whereYear('fecha', now()->year)
             ->count();
         
-        return view('dashboard', compact('totalClientes', 'totalVehiculos', 'totalReservas', 'reservasHoy', 'reservasEstaSemana', 'reservasEsteMes'));
+        // Reservas entregadas y no entregadas
+        $reservasEntregadas = Reserva::where('estatus', Reserva::ESTATUS_ENTREGADO)->count();
+        $reservasNoEntregadas = Reserva::where('estatus', Reserva::ESTATUS_NO_ENTREGADO)->count();
+        
+        return view('dashboard', compact(
+            'totalClientes', 
+            'totalVehiculos', 
+            'totalReservas', 
+            'reservasHoy', 
+            'reservasEstaSemana', 
+            'reservasEsteMes',
+            'reservasEntregadas',
+            'reservasNoEntregadas'
+        ));
     })->name('dashboard');
 
     // Rutas de Clientes

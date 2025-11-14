@@ -10,7 +10,7 @@
                 id="nombre"
                 value="{{ old('nombre', optional($producto)->nombre) }}"
                 required
-                placeholder="Ej: Marqueta de 80 kilos"
+                placeholder="Ej: Marqueta"
                 class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
             >
             @error('nombre')
