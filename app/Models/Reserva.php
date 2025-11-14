@@ -17,6 +17,14 @@ class Reserva extends Model
         self::ESTATUS_NO_ENTREGADO => 'No Entregado',
     ];
 
+    public const TIPO_PAGO_CONTADO = 'contado';
+    public const TIPO_PAGO_CREDITO = 'credito';
+
+    public const TIPOS_PAGO = [
+        self::TIPO_PAGO_CONTADO => 'Contado',
+        self::TIPO_PAGO_CREDITO => 'Crédito',
+    ];
+
     protected $fillable = [
         'cliente_id',
         'vehiculo_id',
@@ -25,6 +33,7 @@ class Reserva extends Model
         'cantidad',
         'observaciones',
         'estatus',
+        'tipo_pago',
     ];
 
     protected $casts = [

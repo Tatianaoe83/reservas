@@ -185,6 +185,15 @@
             @endif
 
             <!-- Tabla Detallada de Reservas -->
+            @php
+                $estatusLabels = \App\Models\Reserva::ESTATUS;
+                $estatusColors = [
+                    \App\Models\Reserva::ESTATUS_PROGRAMADO => 'bg-yellow-100 text-yellow-800 border border-yellow-200',
+                    \App\Models\Reserva::ESTATUS_ENTREGADO => 'bg-green-100 text-green-800 border border-green-200',
+                    \App\Models\Reserva::ESTATUS_NO_ENTREGADO => 'bg-red-100 text-red-800 border border-red-200',
+                ];
+                $tiposPago = \App\Models\Reserva::TIPOS_PAGO;
+            @endphp
             <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
                 <div class="px-6 py-4 border-b border-gray-200">
                     <h3 class="text-lg font-bold text-gray-900">Detalle de Reservas</h3>
@@ -196,7 +205,10 @@
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hora</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Producto</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vehículo</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Método de pago</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estatus</th>
                                 <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Cantidad</th>
                                 <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Precio Unit.</th>
                                 <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Ventas</th>
@@ -215,7 +227,23 @@
                                         {{ $reserva->cliente->negocio }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                        {{ $reserva->cliente->producto->nombre ?? 'Sin producto' }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                                         {{ $reserva->vehiculo->nombre }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                        {{ $tiposPago[$reserva->tipo_pago ?? \App\Models\Reserva::TIPO_PAGO_CONTADO] ?? 'Contado' }}
+                                    </td>
+                                    @php
+                                        $estatus = $reserva->estatus ?? \App\Models\Reserva::ESTATUS_PROGRAMADO;
+                                        $estatusLabel = $estatusLabels[$estatus] ?? 'Programado';
+                                        $badgeClass = $estatusColors[$estatus] ?? 'bg-gray-100 text-gray-800 border border-gray-200';
+                                    @endphp
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold {{ $badgeClass }}">
+                                            {{ strtoupper($estatusLabel) }}
+                                        </span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-700">
                                         {{ number_format($reserva->cantidad, 0, ',', '.') }}
@@ -229,7 +257,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="7" class="px-6 py-12 text-center">
+                                    <td colspan="10" class="px-6 py-12 text-center">
                                         <div class="flex flex-col items-center justify-center">
                                             <svg class="h-16 w-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -243,7 +271,7 @@
                         @if($reservas->count() > 0)
                         <tfoot class="bg-gray-100 font-bold">
                             <tr>
-                                <td colspan="4" class="px-6 py-4 text-right text-sm text-gray-700">
+                                <td colspan="7" class="px-6 py-4 text-right text-sm text-gray-700">
                                     TOTALES:
                                 </td>
                                 <td class="px-6 py-4 text-center text-sm text-gray-900">

@@ -93,6 +93,8 @@ class ReservaSeeder extends Seeder
                     'hora' => $horaSeleccionada,
                     'cantidad' => $cantidad,
                     'observaciones' => $observaciones,
+                    'estatus' => Reserva::ESTATUS_PROGRAMADO,
+                    'tipo_pago' => rand(0, 1) ? Reserva::TIPO_PAGO_CONTADO : Reserva::TIPO_PAGO_CREDITO,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ];

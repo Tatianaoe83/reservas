@@ -46,12 +46,24 @@
                                 <th>Cliente</th>
                                 <th>Vehículo</th>
                                 <th>Cantidad</th>
+                                <th>Tipo de Pago</th>
+                                <th>Total</th>
                                 <th>Estatus</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
                             @forelse($reservas as $reserva)
+                                @php
+                                    $precioUnitario = $reserva->cliente->precio_venta ?? 0;
+                                    $total = $precioUnitario * $reserva->cantidad;
+                                    $tipoPago = \App\Models\Reserva::TIPOS_PAGO[$reserva->tipo_pago ?? \App\Models\Reserva::TIPO_PAGO_CONTADO] ?? 'Contado';
+                                    $tipoPagoColors = [
+                                        'contado' => 'bg-slate-100 text-slate-800',
+                                        'credito' => 'bg-indigo-100 text-indigo-800',
+                                    ];
+                                    $tipoColor = $tipoPagoColors[$reserva->tipo_pago ?? \App\Models\Reserva::TIPO_PAGO_CONTADO] ?? 'bg-gray-100 text-gray-800';
+                                @endphp
                                 <tr>
                                     <td data-order="{{ $reserva->fecha->format('Y-m-d') }}">
                                         <div class="flex items-center">
@@ -84,6 +96,19 @@
                                         </span>
                                     </td>
                                     <td>
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold {{ $tipoColor }}">
+                                            {{ $tipoPago }}
+                                        </span>
+                                    </td>
+                                    <td data-order="{{ $total }}">
+                                        <div class="text-sm font-bold text-gray-900">
+                                            ${{ number_format($total, 2) }}
+                                        </div>
+                                        <div class="text-xs text-gray-500">
+                                            ({{ $reserva->cantidad }} x ${{ number_format($precioUnitario, 2) }})
+                                        </div>
+                                    </td>
+                                    <td>
                                         @php
                                             $estatusColors = [
                                                 'programado' => 'bg-yellow-100 text-yellow-800',
@@ -104,6 +129,14 @@
                                                 </svg>
                                                 Editar
                                             </a>
+                                            @if($reserva->estatus === \App\Models\Reserva::ESTATUS_PROGRAMADO)
+                                                <a href="{{ route('reservas.ticket', $reserva) }}" target="_blank" class="inline-flex items-center px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 font-semibold transition-colors duration-150">
+                                                    <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                                    </svg>
+                                                    Ticket
+                                                </a>
+                                            @endif
                                             <form action="{{ route('reservas.destroy', $reserva) }}" method="POST" class="inline">
                                                 @csrf
                                                 @method('DELETE')
@@ -119,7 +152,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="7" class="text-center py-8">
+                                    <td colspan="9" class="text-center py-8">
                                         <div class="flex flex-col items-center">
                                             <svg class="h-16 w-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -198,7 +231,7 @@
                 lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Todos"]],
                 order: [[0, 'asc'], [1, 'asc']], // Ordenar por fecha y luego por hora
                 columnDefs: [
-                    { orderable: false, targets: 6 }, // Deshabilitar ordenamiento en columna de acciones
+                    { orderable: false, targets: 8 }, // Deshabilitar ordenamiento en columna de acciones
                     { type: 'date', targets: 0 } // Tipo fecha para la columna de fecha
                 ]
             });

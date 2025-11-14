@@ -243,7 +243,7 @@ class ReporteController extends Controller
 
     private function obtenerDatosReporteGeneral(Carbon $fechaInicio, Carbon $fechaFin): array
     {
-        $reservas = Reserva::with(['cliente', 'vehiculo'])
+        $reservas = Reserva::with(['cliente.producto', 'vehiculo'])
             ->whereBetween('fecha', [$fechaInicio, $fechaFin])
             ->where('estatus', Reserva::ESTATUS_ENTREGADO)
             ->orderBy('fecha')

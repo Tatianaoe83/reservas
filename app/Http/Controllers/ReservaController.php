@@ -14,7 +14,7 @@ class ReservaController extends Controller
 {
     public function index(): View
     {
-        $reservas = Reserva::with(['cliente', 'vehiculo'])
+        $reservas = Reserva::with(['cliente.producto', 'vehiculo'])
             ->orderBy('fecha')
             ->orderBy('hora')
             ->get();
@@ -49,6 +49,7 @@ class ReservaController extends Controller
             'cantidad' => 'required|integer|min:1',
             'observaciones' => 'nullable|string',
             'estatus' => 'required|in:' . implode(',', array_keys(Reserva::ESTATUS)),
+            'tipo_pago' => 'required|in:' . implode(',', array_keys(Reserva::TIPOS_PAGO)),
         ]);
 
         // Validar que el horario esté dentro del rango permitido (7:00 AM - 7:00 PM)
@@ -92,8 +93,12 @@ class ReservaController extends Controller
 
     public function show(Reserva $reserva): View
     {
-        $reserva->load(['cliente', 'vehiculo']);
-        return view('reservas.show', compact('reserva'));
+        $reserva->load(['cliente.producto', 'vehiculo']);
+
+        $precioUnitario = $reserva->cliente->precio_venta ?? 0;
+        $total = $precioUnitario * ($reserva->cantidad ?? 0);
+
+        return view('reservas.show', compact('reserva', 'precioUnitario', 'total'));
     }
 
     public function edit(Reserva $reserva): View
@@ -115,6 +120,7 @@ class ReservaController extends Controller
             'cantidad' => 'required|integer|min:1',
             'observaciones' => 'nullable|string',
             'estatus' => 'required|in:' . implode(',', array_keys(Reserva::ESTATUS)),
+            'tipo_pago' => 'required|in:' . implode(',', array_keys(Reserva::TIPOS_PAGO)),
         ]);
 
         // Validar que el horario esté dentro del rango permitido
@@ -253,5 +259,21 @@ class ReservaController extends Controller
         }
 
         return $horarios;
+    }
+
+    public function ticket(Reserva $reserva): View
+    {
+        $reserva->load(['cliente.producto', 'vehiculo']);
+
+        abort_if($reserva->estatus !== Reserva::ESTATUS_PROGRAMADO, 403, 'Solo las reservas programadas generan ticket.');
+
+        $precioUnitario = $reserva->cliente->precio_venta ?? 0;
+        $total = $precioUnitario * ($reserva->cantidad ?? 0);
+
+        return view('reservas.ticket', [
+            'reserva' => $reserva,
+            'precioUnitario' => $precioUnitario,
+            'total' => $total,
+        ]);
     }
 }

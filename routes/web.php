@@ -59,6 +59,7 @@ Route::middleware([
     // IMPORTANTE: Estas rutas deben ir ANTES del resource para evitar conflictos
     Route::get('reservas-calendario', [ReservaController::class, 'calendario'])->name('reservas.calendario');
     Route::get('reservas/horarios-disponibles', [ReservaController::class, 'getHorariosDisponibles'])->name('reservas.horarios-disponibles');
+    Route::get('reservas/{reserva}/ticket', [ReservaController::class, 'ticket'])->name('reservas.ticket');
     Route::resource('reservas', ReservaController::class);
 
     // Rutas de Reportes

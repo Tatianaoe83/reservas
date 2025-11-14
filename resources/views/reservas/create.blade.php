@@ -156,6 +156,21 @@
                             @enderror
                         </div>
 
+                        <div>
+                            <label for="tipo_pago" class="block text-sm font-medium text-gray-700">Tipo de Pago *</label>
+                            <select name="tipo_pago" id="tipo_pago" required
+                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                @foreach(\App\Models\Reserva::TIPOS_PAGO as $key => $label)
+                                    <option value="{{ $key }}" {{ old('tipo_pago', \App\Models\Reserva::TIPO_PAGO_CONTADO) == $key ? 'selected' : '' }}>
+                                        {{ $label }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('tipo_pago')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
                         <div class="md:col-span-2">
                             <label for="observaciones" class="block text-sm font-medium text-gray-700">Observaciones</label>
                             <textarea name="observaciones" id="observaciones" rows="3"

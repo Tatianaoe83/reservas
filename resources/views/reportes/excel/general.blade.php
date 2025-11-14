@@ -76,7 +76,10 @@
         <th>Fecha</th>
         <th>Hora</th>
         <th>Cliente</th>
+        <th>Producto</th>
         <th>Vehículo</th>
+        <th>Método de pago</th>
+        <th>Estatus</th>
         <th>Cantidad</th>
         <th>Precio unitario</th>
         <th>Ganancia</th>
@@ -86,14 +89,17 @@
             <td>{{ $reserva->fecha->format('d/m/Y') }}</td>
             <td>{{ \Carbon\Carbon::parse($reserva->hora)->format('h:i A') }}</td>
             <td>{{ $reserva->cliente->negocio }}</td>
+            <td>{{ $reserva->cliente->producto->nombre ?? 'Sin producto' }}</td>
             <td>{{ $reserva->vehiculo->nombre }}</td>
+            <td>{{ \App\Models\Reserva::TIPOS_PAGO[$reserva->tipo_pago ?? \App\Models\Reserva::TIPO_PAGO_CONTADO] ?? 'Contado' }}</td>
+            <td>{{ \App\Models\Reserva::ESTATUS[$reserva->estatus ?? \App\Models\Reserva::ESTATUS_PROGRAMADO] ?? 'Programado' }}</td>
             <td>{{ number_format($reserva->cantidad, 0, ',', '.') }}</td>
             <td>{{ number_format($reserva->cliente->precio_venta, 2, ',', '.') }}</td>
             <td>{{ number_format($reserva->cliente->precio_venta * $reserva->cantidad, 2, ',', '.') }}</td>
         </tr>
     @empty
         <tr>
-            <td colspan="7">No hay reservas en el rango de fechas seleccionado.</td>
+            <td colspan="10">No hay reservas en el rango de fechas seleccionado.</td>
         </tr>
     @endforelse
 </table>
